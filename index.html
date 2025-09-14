@@ -7,6 +7,8 @@
 <title>Зоны от АНП — compact hearts</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
+<!-- Версия 1.1 -->
+
 <style>
   :root{
     --bg:#e9edf4; --ink:#2b2f36; --muted:#6e7785; --panel:#e9edf4;
@@ -22,77 +24,97 @@
     -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   }
 
-  .viewport{min-height:100svh; padding:clamp(8px,2.5vh,18px); display:flex; align-items:center; justify-content:center;}
-  .shell{width:min(480px,100%);} 
+  .viewport{min-height:100svh; padding:clamp(4px,2vh,12px); display:flex; align-items:center; justify-content:center;}
+  .shell{width:min(460px,100%);} 
 
   .card{
-    background:var(--panel); border-radius:28px; padding:16px 14px;
-    box-shadow:14px 14px 28px var(--shadow-dark), -14px -14px 28px var(--shadow-light);
+    background:var(--panel); border-radius:24px; padding:12px;
+    box-shadow:12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
     overflow:hidden;
   }
 
-  /* РАДАР — теперь сверху */
-  .radar{position:relative; height:120px; margin:4px 0 14px; border-radius:22px; overflow:hidden;
-         background:var(--panel); box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light);} 
+  /* РАДАР */
+  .radar{position:relative; height:110px; margin:4px 0 10px; border-radius:20px; overflow:hidden;
+         background:var(--panel); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);} 
   .heart{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-         width:64px; height:64px; border-radius:50%; display:grid; place-items:center; color:#fff;
+         width:56px; height:56px; border-radius:50%; display:grid; place-items:center; color:#fff;
          background:radial-gradient(circle at 30% 30%, #ff5a6f, var(--accent));
-         box-shadow:0 10px 18px rgba(239,35,60,.22), inset 0 1px 0 rgba(255,255,255,.35);} 
-  .heart:before{content:"❤"; font-size:26px;}
-  .ecg-wrap{position:absolute; left:14px; right:14px; bottom:10px; height:44px;}
+         box-shadow:0 8px 14px rgba(239,35,60,.22), inset 0 1px 0 rgba(255,255,255,.35);} 
+  .heart:before{content:"❤"; font-size:22px;}
+  .ecg-wrap{position:absolute; left:12px; right:12px; bottom:8px; height:38px;}
   svg.ecg{width:100%; height:100%}
-  .trace{fill:none; stroke:var(--accent); stroke-width:2.5; stroke-dasharray:560 560; stroke-dashoffset:560; animation:draw 3.2s linear infinite;}
+  .trace{fill:none; stroke:var(--accent); stroke-width:2.2; stroke-dasharray:560 560; stroke-dashoffset:560; animation:draw 3.2s linear infinite;}
   @keyframes draw{from{stroke-dashoffset:560;} to{stroke-dashoffset:0;}}
 
-  /* СЕТКА КАРТОЧЕК */
-  .tiles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:8px; margin-bottom:14px; width:100%;}
+  /* ФОРМА */
+  .form{display:flex; flex-direction:column; align-items:center; gap:6px; margin:0 0 10px;}
+  .form .hint{font-size:13px; color:var(--muted);} 
+  label{ color:var(--muted); font-size:15px;}
+  .input{
+    height:46px; width:100%; max-width:280px; text-align:center;
+    border-radius:14px; outline:none; padding:0 12px; font-size:22px; font-family:'Bebas Neue',sans-serif; color:var(--ink);
+    border:0; background:var(--panel);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+  }
+  .btn-red{
+    background:linear-gradient(180deg,#ff5a6f,var(--accent));
+    border:none; color:#fff; text-align:center; padding:12px; border-radius:18px;
+    display:flex; justify-content:center; align-items:center;
+    box-shadow:8px 8px 14px rgba(239,35,60,.2), -6px -6px 14px rgba(255,255,255,.6), inset 0 1px 0 rgba(255,255,255,.25);
+    transition:transform .1s ease; cursor:pointer; width:100%; max-width:380px; font-size:16px; margin-top:6px;
+  }
+  .pressed{transform:scale(.97);} 
+
+  /* ПЛИТКИ ЗОН */
+  .tiles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:6px; margin-bottom:10px; width:100%;}
   @media (max-width:360px){ .tiles{ grid-template-columns:minmax(0,1fr); } }
 
-  .tile{ background:var(--panel); border-radius:var(--radius); padding:12px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px;
-    box-shadow:8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light); cursor:pointer; }
+  .tile{
+    background:var(--panel);
+    border-radius:16px;
+    padding:10px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    box-shadow:6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    cursor:pointer;
+  }
 
-  /* Пульс анимация */
   .tile.pulse{ animation:pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse{ 0%{ transform:scale(1); box-shadow:8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);} 50%{ transform:scale(1.02); box-shadow:12px 12px 22px rgba(0,0,0,.06), -12px -12px 22px rgba(255,255,255,.9);} 100%{ transform:scale(1); box-shadow:8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);} }
+  @keyframes pulse{0%{ transform:scale(1);}50%{ transform:scale(1.02);}100%{ transform:scale(1);} }
 
-  .zone-row{display:flex; align-items:center; justify-content:center; gap:6px;}
-  .zone-title{font-size:16px; color:var(--ink);} 
+  .zone-row{display:flex; align-items:center; justify-content:center; gap:4px;}
+  .zone-title{font-size:14px; color:var(--ink);} 
   .hearts{display:flex; gap:2px;}
   .hearts span{ font-size:9px; line-height:1; color:#bbb; }
   .hearts span.active{color:var(--accent);} 
+  .zone-desc{font-size:13px; color:var(--muted);} 
+  .num{font-size:20px; font-family:'Bebas Neue',sans-serif;}
 
-  .zone-desc{font-size:14px; color:var(--muted);} 
-  .num{font-size:22px;}
-
-  /* Кнопки */
-  .tile-red,.btn-red{ background:linear-gradient(180deg,#ff5a6f,var(--accent)); border:none; color:#fff; text-align:center; padding:14px; border-radius:20px; display:flex; justify-content:center; align-items:center;
-    box-shadow:10px 10px 18px rgba(239,35,60,.2), -8px -8px 18px rgba(255,255,255,.6), inset 0 1px 0 rgba(255,255,255,.25); transition:transform .1s ease; cursor:pointer; }
-  .tile-red{grid-column:1 / -1; font-size:16px; margin-top:14px;} 
-  .btn-red{width:100%; margin-top:10px; font-size:18px; max-width:440px;}
-  .pressed{transform:scale(.97);} 
-
-  /* Форма — теперь ПОД радаром */
-  .form{display:flex; flex-direction:column; align-items:center; gap:8px; margin:0 0 14px;}
-  .form .hint{font-size:14px; color:var(--muted);} 
-  label{ color:var(--muted); font-size:16px;}
-  .input{ height:50px; width:100%; max-width:320px; text-align:center; border-radius:16px; outline:none; padding:0 14px; font-size:20px; color:var(--ink); border:0; background:var(--panel); box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light); }
-
-  /* Модалка */
-  .backdrop{position:fixed; inset:0; background:rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; padding:18px; z-index:50; opacity:0; visibility:hidden; transition:opacity .18s ease, visibility 0s linear .18s;}
-  .backdrop.show{opacity:1; visibility:visible;}
-  .modal{width:min(380px,100%); background:var(--panel); border-radius:20px; padding:14px 16px; text-align:left; box-shadow:14px 14px 28px var(--shadow-dark), -14px -14px 28px var(--shadow-light);} 
-  .modal header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
-  .modal h3{font-size:20px; margin:2px 0;}
-  .modal .content{color:var(--muted); font-size:16px; line-height:1.3; max-height:50vh; overflow:auto;}
-  .close{appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);} 
+  /* Кнопка подсказки */
+  .tile-red{grid-column:1 / -1; font-size:14px; margin-top:6px; background:linear-gradient(180deg,#ff5a6f,var(--accent)); border:none; color:#fff; text-align:center; padding:12px; border-radius:16px; display:flex; justify-content:center; align-items:center; box-shadow:8px 8px 14px rgba(239,35,60,.2), -6px -6px 14px rgba(255,255,255,.6), inset 0 1px 0 rgba(255,255,255,.25); transition:transform .1s ease; cursor:pointer;}
+/* === Compact tweaks for one-screen fit (override) === */
+  .viewport{padding:clamp(6px,1.8vh,14px);} 
+  .radar{height:96px; margin:4px 0 10px;}
+  .heart{width:56px; height:56px;}
+  .heart:before{font-size:24px;}
+  .ecg-wrap{left:12px; right:12px; bottom:8px; height:38px;}
+  .trace{stroke-width:2.2;}
+  .form{gap:6px; margin-bottom:10px;}
+  .input{height:48px; font-size:22px; font-family:system-ui, -apple-system, Roboto, Arial;}
+  .btn-red{padding:12px; border-radius:18px; font-size:16px; margin-top:6px;}
+  .tiles{gap:8px; margin-bottom:10px;}
+  .tile{padding:10px; border-radius:18px;}
+  .num{font-size:20px; font-family:'Bebas Neue', system-ui, -apple-system, Roboto, Arial;}
+  .tile-red{padding:12px; font-size:15px; border-radius:18px;}
+  @media (max-height: 740px){
+    .radar{height:88px;} .heart{width:52px; height:52px;} .input{height:46px; font-size:20px;}
+    .btn-red{padding:10px; font-size:15px;} .num{font-size:19px; font-family:'Bebas Neue', system-ui, -apple-system, Roboto, Arial;}
+  }
 </style>
 </head>
 <body>
   <div class="viewport">
     <div class="shell">
       <div class="card">
-
-        <!-- РАДАР НА САМОМ ВЕРХУ -->
         <div class="radar">
           <div class="heart"></div>
           <div class="ecg-wrap">
@@ -105,26 +127,22 @@
           </div>
         </div>
 
-        <!-- ФОРМА ПОД РАДАРОМ -->
         <div class="form">
           <div style="text-align:center">
             <label for="anp">Мой анаэробный порог</label>
             <div class="hint">уд/мин</div>
           </div>
-          <input id="anp" class="input" type="number" min="60" max="220" value="165" />
+          <input id="anp" class="input" type="number" min="60" max="220" value="165" inputmode="numeric" pattern="[0-9]*" />
           <button class="btn-red" id="doCalc">Рассчитать мой анаэробный порог</button>
         </div>
 
-        <!-- ПЛИТКИ ЗОН -->
         <div class="tiles" id="zonesGrid"></div>
 
-        <!-- КНОПКА ПОДСКАЗКИ САМОМ НИЗУ -->
         <div class="tile-red" id="helpTile">Как узнать свой<br>анаэробный порог</div>
       </div>
     </div>
   </div>
 
-  <!-- МОДАЛКА -->
   <div class="backdrop" id="modal">
     <div class="modal">
       <header>
@@ -139,7 +157,9 @@
 
 <script>
   const $ = s => document.querySelector(s);
-  let pulseIndex = 0; // текущая пульсирующая карточка
+  let pulseIndex = 0;
+  let clearedOnce = false;
+  let lastValidANP = 165;
 
   function calcZones(anp){
     const r=n=>Math.round(n);
@@ -152,7 +172,6 @@
     ];
   }
 
-  // Описания зон (вставьте ваши подробные тексты при необходимости)
   function zoneInfo(i){
     const infos=[
       {title:'ЗОНА 1 — Восстановительная', html:'<p>Описание зоны 1…</p>'},
@@ -164,10 +183,16 @@
     return infos[i];
   }
 
-  function render(){
-    const v = parseInt($('#anp').value,10);
-    if (isNaN(v) || v<60 || v>220) return;
+  function getANP(){
+    let v = parseInt($('#anp').value,10);
+    if (Number.isNaN(v)) v = lastValidANP;
+    v = Math.max(60, Math.min(220, v));
+    lastValidANP = v;
+    return v;
+  }
 
+  function render(){
+    const v = getANP();
     const list = calcZones(v);
     const grid = $('#zonesGrid');
     grid.innerHTML = '';
@@ -197,7 +222,6 @@
       grid.appendChild(el);
     });
 
-    // восстановим последовательную пульсацию, начиная с первой
     pulseIndex = 0;
     applyPulse(pulseIndex);
   }
@@ -245,22 +269,22 @@
     el.addEventListener('mouseleave', rm);
   }
 
-  // События
   bindPress($('#doCalc'));
   bindPress($('#helpTile'));
   $('#doCalc').addEventListener('click', render);
   $('#anp').addEventListener('keydown', e=>{ if(e.key==='Enter') render(); });
-  $('#anp').addEventListener('focus', e=> e.target.value = '');
+  $('#anp').addEventListener('focus', e=>{ if(!clearedOnce){ e.target.value=''; clearedOnce=true; } });
+  $('#anp').addEventListener('blur', e=>{ if(!e.target.value){ e.target.value = lastValidANP; } });
   $('#helpTile').addEventListener('click', ()=>{
     $('#modalTitle').textContent = 'Как определить АНП';
     $('#modalContent').innerHTML = '<p>Беги 1 час максимально равномерно. Средний пульс за 60 минут — твой АНП.</p>';
     $('#modal').classList.add('show');
   });
 
-  // Первый рендер
   render();
 </script>
 </body>
 </html>
+
 
 
