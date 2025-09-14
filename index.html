@@ -7,8 +7,6 @@
 <title>Зоны от АНП — compact hearts</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
-<!-- Версия 1.1 -->
-
 <style>
   :root{
     --bg:#e9edf4; --ink:#2b2f36; --muted:#6e7785; --panel:#e9edf4;
@@ -30,7 +28,7 @@
   .card{
     background:var(--panel); border-radius:24px; padding:12px;
     box-shadow:12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
-    overflow:hidden;
+    overflow:visible; /* фикс для модалки */
   }
 
   /* РАДАР */
@@ -91,24 +89,17 @@
 
   /* Кнопка подсказки */
   .tile-red{grid-column:1 / -1; font-size:14px; margin-top:6px; background:linear-gradient(180deg,#ff5a6f,var(--accent)); border:none; color:#fff; text-align:center; padding:12px; border-radius:16px; display:flex; justify-content:center; align-items:center; box-shadow:8px 8px 14px rgba(239,35,60,.2), -6px -6px 14px rgba(255,255,255,.6), inset 0 1px 0 rgba(255,255,255,.25); transition:transform .1s ease; cursor:pointer;}
-/* === Compact tweaks for one-screen fit (override) === */
-  .viewport{padding:clamp(6px,1.8vh,14px);} 
-  .radar{height:96px; margin:4px 0 10px;}
-  .heart{width:56px; height:56px;}
-  .heart:before{font-size:24px;}
-  .ecg-wrap{left:12px; right:12px; bottom:8px; height:38px;}
-  .trace{stroke-width:2.2;}
-  .form{gap:6px; margin-bottom:10px;}
-  .input{height:48px; font-size:22px; font-family:system-ui, -apple-system, Roboto, Arial;}
-  .btn-red{padding:12px; border-radius:18px; font-size:16px; margin-top:6px;}
-  .tiles{gap:8px; margin-bottom:10px;}
-  .tile{padding:10px; border-radius:18px;}
-  .num{font-size:20px; font-family:'Bebas Neue', system-ui, -apple-system, Roboto, Arial;}
-  .tile-red{padding:12px; font-size:15px; border-radius:18px;}
-  @media (max-height: 740px){
-    .radar{height:88px;} .heart{width:52px; height:52px;} .input{height:46px; font-size:20px;}
-    .btn-red{padding:10px; font-size:15px;} .num{font-size:19px; font-family:'Bebas Neue', system-ui, -apple-system, Roboto, Arial;}
-  }
+
+  /* Модалка */
+  .backdrop{position:fixed; inset:0; background:rgba(0,0,0,.25); display:none; align-items:center; justify-content:center;
+            padding:18px; z-index:9999; opacity:0; transition:opacity .18s ease;}
+  .backdrop.show{display:flex; opacity:1;}
+  .modal{width:min(360px,100%); background:var(--panel); border-radius:20px; padding:14px 16px; text-align:left;
+         box-shadow:14px 14px 28px var(--shadow-dark), -14px -14px 28px var(--shadow-light);} 
+  .modal header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .modal h3{font-size:18px; margin:2px 0;}
+  .modal .content{color:var(--muted); font-size:15px; line-height:1.3; max-height:50vh; overflow:auto;}
+  .close{appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);} 
 </style>
 </head>
 <body>
@@ -232,16 +223,18 @@
     if(tiles[idx]) tiles[idx].classList.add('pulse');
   }
 
-  function openInfo(index){
-    const info = zoneInfo(index);
-    $('#modalTitle').textContent = info.title;
-    $('#modalContent').innerHTML = info.html;
+  // === Общая функция открытия модалки (вешает крестик, фон, Esc) ===
+  function openModal(title, html, advanceIndex){
+    $('#modalTitle').textContent = title;
+    $('#modalContent').innerHTML = html;
     $('#modal').classList.add('show');
 
     const onClose = ()=>{
       $('#modal').classList.remove('show');
-      pulseIndex = Math.min(index+1, 4);
-      applyPulse(pulseIndex);
+      if (typeof advanceIndex === 'number') {
+        const next = Math.min(advanceIndex + 1, 4);
+        applyPulse(next);
+      }
       detach();
     };
     const onBackdrop = (e)=>{ if(e.target === $('#modal')) onClose(); };
@@ -256,6 +249,11 @@
     $('#modalClose').addEventListener('click', onClose, {once:true});
     $('#modal').addEventListener('click', onBackdrop, {once:true});
     document.addEventListener('keydown', onKey, {once:true});
+  }
+
+  function openInfo(index){
+    const info = zoneInfo(index);
+    openModal(info.title, info.html, index);
   }
 
   function bindPress(el){
@@ -275,16 +273,17 @@
   $('#anp').addEventListener('keydown', e=>{ if(e.key==='Enter') render(); });
   $('#anp').addEventListener('focus', e=>{ if(!clearedOnce){ e.target.value=''; clearedOnce=true; } });
   $('#anp').addEventListener('blur', e=>{ if(!e.target.value){ e.target.value = lastValidANP; } });
+
+  // Нижняя кнопка — теперь тоже через общий openModal
   $('#helpTile').addEventListener('click', ()=>{
-    $('#modalTitle').textContent = 'Как определить АНП';
-    $('#modalContent').innerHTML = '<p>Беги 1 час максимально равномерно. Средний пульс за 60 минут — твой АНП.</p>';
-    $('#modal').classList.add('show');
+    openModal('Как определить АНП', '<p>Беги 1 час максимально равномерно. Средний пульс за 60 минут — твой АНП.</p>');
   });
 
   render();
 </script>
 </body>
 </html>
+
 
 
 
