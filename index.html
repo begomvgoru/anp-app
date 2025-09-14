@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#1c1c1c" />
-<title>Зоны от АНП — compact hearts (Dark)</title>
+<title>Зоны от АНП — compact hearts (Dark · Glassmorphism)</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
 <style>
@@ -12,6 +12,14 @@
     --bg:#1c1c1c; --ink:#e9edf4; --muted:#a0a4ae; --panel:#2a2a2a;
     --accent:#EF233C;
     --shadow-dark:#121212; --shadow-light:#333333; --radius:20px;
+
+    /* Glassmorphism tokens */
+    --glass-bg: rgba(255,255,255,.07);
+    --glass-border: rgba(255,255,255,.22);
+    --glass-highlight: rgba(255,255,255,.35);
+    --glass-shadow: rgba(0,0,0,.45);
+    --glass-blur: 18px;
+    --glass-glow: 0 10px 30px rgba(239,35,60,.25);
   }
 
   *{box-sizing:border-box}
@@ -20,7 +28,6 @@
     margin:0; color:var(--ink); font-family:'Bebas Neue',system-ui,-apple-system,Roboto,Arial;
     background: var(--bg);
     -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-    transition: filter .2s ease;
   }
 
   .viewport{min-height:100svh; padding:clamp(4px,2vh,12px); display:flex; align-items:center; justify-content:center;}
@@ -33,15 +40,37 @@
   }
 
   /* РАДАР */
-  .radar{position:relative; height:110px; margin:4px 0 10px; border-radius:20px; overflow:hidden;
-         background:var(--panel); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);} 
-  .heart{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-         width:56px; height:56px; border-radius:50%; display:grid; place-items:center; color:#fff;
-         background:radial-gradient(circle at 30% 30%, #ff5a6f, var(--accent));
-         box-shadow:0 8px 14px rgba(239,35,60,.35), inset 0 1px 0 rgba(255,255,255,.25);} 
+  .radar{
+    position:relative; height:110px; margin:4px 0 10px; border-radius:20px; overflow:hidden;
+    /* Ровная подложка без вдавления и без обводки */
+    background:var(--panel);
+    box-shadow:none;
+    border:none;
+    outline:none;
+  }
+
+  /* Кружок с сердцем — по центру контейнера (поверх линии) */
+  .heart{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:56px; height:56px; border-radius:50%; display:grid; place-items:center; color:#fff;
+    background:radial-gradient(circle at 30% 30%, #ff5a6f, var(--accent));
+    box-shadow:0 8px 14px rgba(239,35,60,.35), inset 0 1px 0 rgba(255,255,255,.25);
+    z-index:3; /* выше линии */
+  }
   .heart:before{content:"❤"; font-size:22px;}
-  .ecg-wrap{position:absolute; left:12px; right:12px; bottom:8px; height:38px;}
-  svg.ecg{width:100%; height:100%}
+
+  /* Линия пульса — центр, под кружком */
+  .ecg-wrap{
+    position:absolute; left:12px; right:12px;
+    top:50%; transform: translateY(-50%);
+    height:48px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    outline: none;
+    z-index:2; /* ниже кружка — линия спрятана под сердцем */
+  }
+  svg.ecg{width:100%; height:100%; border:none; outline:none;}
   .trace{fill:none; stroke:var(--accent); stroke-width:2.2; stroke-dasharray:560 560; stroke-dashoffset:560; animation:draw 3.2s linear infinite;}
   @keyframes draw{from{stroke-dashoffset:560;} to{stroke-dashoffset:0;}}
 
@@ -97,46 +126,114 @@
   .zone-desc{font-size:13px; color:var(--muted);} 
   .num{font-size:20px; font-family:'Bebas Neue',sans-serif;}
 
-  /* ====== МОДАЛКА: центр и глассморфизм ====== */
+  /* ===========================
+     ГЛАССМОРФНЫЕ ВСПЛЫВАЮЩИЕ ОКНА
+     =========================== */
+
   .backdrop{
-    position:fixed; inset:0;
-    display:none; align-items:center; justify-content:center;
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
     padding:18px; z-index:9999; opacity:0; transition:opacity .18s ease;
-    background:rgba(0,0,0,.45);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: radial-gradient(60% 60% at 50% 50%, rgba(0,0,0,.55), rgba(0,0,0,.65) 60%, rgba(0,0,0,.72));
+    backdrop-filter: blur(8px) saturate(110%);
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
   }
   .backdrop.show{display:flex; opacity:1;}
 
   .modal{
-    width:min(420px,100%);
+    width:min(360px,100%);
+    position:relative;
     border-radius:20px;
     padding:14px 16px;
     text-align:left;
 
-    /* ГЛАССМОРФИЗМ */
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.18);
+    background: linear-gradient(140deg, rgba(255,255,255,.12), rgba(255,255,255,.04)) border-box;
+    border: 1px solid var(--glass-border);
     box-shadow:
-      0 10px 30px rgba(0,0,0,0.55),
-      inset 0 1px 0 rgba(255,255,255,0.08);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
+      0 1px 0 rgba(255,255,255,.08) inset,
+      0 0 0 1px rgba(255,255,255,.04) inset,
+      0 20px 40px var(--glass-shadow),
+      var(--glass-glow);
+
+    backdrop-filter: blur(var(--glass-blur)) saturate(120%) contrast(105%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%) contrast(105%);
+
+    transform: translateY(6px) scale(.98);
+    opacity: 0;
+    animation: modalIn .24s ease forwards;
   }
 
-  .modal header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
-  .modal h3{font-size:18px; margin:2px 0; color:var(--ink);}
-  .modal .content{color:var(--ink); opacity:.9; font-size:14px; line-height:1.4; max-height:70vh; overflow:auto;}
+  .modal::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:inherit;
+    background:
+      linear-gradient( to bottom right,
+        rgba(255,255,255,.25) 0%,
+        rgba(255,255,255,.08) 30%,
+        rgba(255,255,255,0) 60% );
+    mix-blend-mode: overlay;
+    pointer-events:none;
+    opacity:.5;
+    mask: radial-gradient(120% 100% at 0% 0%, #000 40%, transparent 60%);
+  }
+
+  .modal::after{
+    content:"";
+    position:absolute; inset:0; border-radius:inherit;
+    padding:1px; pointer-events:none;
+    background: linear-gradient(135deg, rgba(239,35,60,.35), rgba(239,35,60,0) 40%, rgba(255,255,255,.25) 70%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+
+  .modal .grain{
+    position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.08;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    mix-blend-mode: soft-light;
+  }
+
+  @keyframes modalIn{
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .modal header{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;
+    padding-bottom:6px;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+  }
+
+  .modal h3{
+    font-size:18px; margin:2px 0; color:var(--ink);
+    text-shadow: 0 1px 0 rgba(0,0,0,.25);
+  }
+
+  .modal .content{color:var(--muted); font-size:14px; line-height:1.4; max-height:50vh; overflow:auto;}
   .close{
-    appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);
-    transition: transform .08s ease, opacity .2s ease;
+    appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--ink);
+    width:32px; height:32px; display:grid; place-items:center; border-radius:10px;
+    transition: transform .12s ease, background-color .12s ease, opacity .12s ease;
+    opacity:.9;
   }
-  .close:active{ transform: scale(.92); opacity:.8; }
+  .close:hover{ background: rgba(255,255,255,.06); }
+  .close:active{ transform: scale(.95); }
 
-  /* Фиксируем скролл боди при открытой модалке */
-  .no-scroll{ overflow: hidden; }
+  @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){
+    .backdrop{ background: rgba(0,0,0,.7); }
+    .modal{ background: rgba(34,34,34,.96); }
+    .modal::before,.modal::after,.modal .grain{ display:none; }
+  }
 
-  /* Только для нижней кнопки — в одну строку */
+  @media (prefers-reduced-motion: reduce){
+    .trace{ animation: none; }
+    .tile.pulse{ animation: none; }
+    .backdrop{ transition: none; }
+    .modal{ animation: none; opacity:1; transform:none; }
+  }
+
   #helpTile{ white-space:nowrap; }
 </style>
 </head>
@@ -147,11 +244,17 @@
         <div class="radar">
           <div class="heart"></div>
           <div class="ecg-wrap">
-            <svg class="ecg" viewBox="0 0 600 100" preserveAspectRatio="none">
-              <path class="trace" d="M0 60 C20 58,35 62,55 60 L80 60 90 50 100 70 110 40 120 75 130 60
-              C160 58,190 62,220 60 L240 60 250 50 260 70 270 45 280 75 290 60
-              C320 58,350 62,380 60 L400 60 410 50 420 70 430 42 440 76 450 60
-              C480 58,520 62,560 60 L600 60"/>
+            <svg class="ecg" viewBox="0 0 600 100" preserveAspectRatio="none" aria-hidden="true">
+              <!-- Базовая линия на y=50, по центру контейнера -->
+              <path class="trace" d="M0 50
+                C20 48,35 52,55 50
+                L80 50 90 40 100 60 110 30 120 65 130 50
+                C160 48,190 52,220 50
+                L240 50 250 40 260 60 270 35 280 65 290 50
+                C320 48,350 52,380 50
+                L400 50 410 40 420 60 430 32 440 66 450 50
+                C480 48,520 52,560 50
+                L600 50"/>
             </svg>
           </div>
         </div>
@@ -167,14 +270,14 @@
 
         <div class="tiles" id="zonesGrid"></div>
 
-        <!-- Нижняя кнопка: идентична верхней, по центру, в одну строку -->
         <button class="btn-red" id="helpTile">Как узнать свой анаэробный порог</button>
       </div>
     </div>
   </div>
 
   <div class="backdrop" id="modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <span class="grain" aria-hidden="true"></span>
       <header>
         <h3 id="modalTitle">Подсказка</h3>
         <button class="close" id="modalClose" aria-label="Закрыть">×</button>
@@ -213,12 +316,19 @@
           <p><strong>Физиология:</strong></p>
           <ul>
             <li>мышцы работают в условиях полного обеспечения кислородом, молочная кислота практически не накапливается;</li>
-            <li>сердце укрепляется мягко — увеличивается ударный объём, без перегрузки;</li>
-            <li>улучшается экономичность дыхания;</li>
-            <li>включается парасимпатический отдел нервной системы → снижение стресса;</li>
-            <li>активируется липолиз (расщепление жиров).</li>
+            <li>сердце укрепляется мягко — увеличивается ударный объём (за одно сокращение выталкивается больше крови), но без перегрузки;</li>
+            <li>улучшается экономичность дыхания, дыхательные мышцы работают без стресса;</li>
+            <li>включается парасимпатический отдел нервной системы → снижение стресса, улучшение восстановления и сна;</li>
+            <li>активируется липолиз (расщепление жиров), снижается уровень кортизола.</li>
           </ul>
-          <p><strong>Тренировки:</strong> восстановительные пробежки, разминка/заминка, лёгкие длительные, ходьба/трусца.</p>
+          <p>Зона 1 — это зона восстановления и “фундаментальная база”. Она не делает вас быстрее напрямую, но позволяет организму адаптироваться и выдерживать более тяжёлые тренировки без перетренированности.</p>
+          <p><strong>Тренировки в этой зоне:</strong></p>
+          <ul>
+            <li>Восстановительные пробежки после тяжёлых тренировок или стартов.</li>
+            <li>Разминка и заминка (начала и окончания тренировки).</li>
+            <li>Длительные лёгкие пробежки для новичков.</li>
+            <li>Ходьба и бег трусцой для снижения стресса и наработки общей базы выносливости.</li>
+          </ul>
         `
       },
       {title:'ЗОНА 2 — Аэробная база', html:'<p>Описание зоны 2…</p>'},
@@ -275,19 +385,13 @@
     if(tiles[idx]) tiles[idx].classList.add('pulse');
   }
 
-  // Общая функция модалки
   function openModal(title, html, advanceIndex){
     $('#modalTitle').textContent = title;
     $('#modalContent').innerHTML = html;
-
-    // Центрируем и фиксируем скролл боди
-    document.body.classList.add('no-scroll');
     $('#modal').classList.add('show');
 
     const onClose = ()=>{
       $('#modal').classList.remove('show');
-      document.body.classList.remove('no-scroll');
-
       if (typeof advanceIndex === 'number') {
         if (advanceIndex < 4) {
           const next = Math.min(advanceIndex + 1, 4);
@@ -332,7 +436,6 @@
   bindPress($('#doCalc'));
   bindPress($('#helpTile'));
 
-  // «Рассчитать»: пересчёт + старт пульсации с 1-й карточки
   $('#doCalc').addEventListener('click', ()=>{
     render();
     pulseIndex = 0;
@@ -349,7 +452,6 @@
   $('#anp').addEventListener('focus', e=>{ if(!clearedOnce){ e.target.value=''; clearedOnce=true; } });
   $('#anp').addEventListener('blur', e=>{ if(!e.target.value){ e.target.value = lastValidANP; } });
 
-  // Нижняя кнопка — подсказка, без изменения пульсации
   $('#helpTile').addEventListener('click', ()=>{
     openModal(
       'Как узнать свой анаэробный порог',
@@ -360,13 +462,10 @@
     );
   });
 
-  // Первый рендер (без пульсации)
   render();
 </script>
 </body>
 </html>
-
-
 
 
        
