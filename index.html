@@ -54,12 +54,16 @@
     border:0; background:var(--panel);
     box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
   }
+
+  /* Красные кнопки (верхняя и нижняя одинаковые, по центру) */
   .btn-red{
     background:linear-gradient(180deg,#ff5a6f,var(--accent));
     border:none; color:#fff; text-align:center; padding:12px; border-radius:18px;
     display:flex; justify-content:center; align-items:center;
     box-shadow:0 0 12px rgba(239,35,60,.4);
-    transition:transform .1s ease; cursor:pointer; width:100%; max-width:380px; font-size:16px; margin-top:6px;
+    transition:transform .1s ease; cursor:pointer; width:100%; max-width:380px;
+    font-size:16px; font-family:'Bebas Neue',sans-serif;
+    margin:6px auto 0; /* центрирование */
   }
   .pressed{transform:scale(.97);} 
 
@@ -92,9 +96,6 @@
   .zone-desc{font-size:13px; color:var(--muted);} 
   .num{font-size:20px; font-family:'Bebas Neue',sans-serif;}
 
-  /* Кнопка подсказки */
-  .tile-red{grid-column:1 / -1; font-size:14px; margin-top:6px; background:linear-gradient(180deg,#ff5a6f,var(--accent)); border:none; color:#fff; text-align:center; padding:12px; border-radius:16px; display:flex; justify-content:center; align-items:center; box-shadow:0 0 12px rgba(239,35,60,.4); transition:transform .1s ease; cursor:pointer;}
-
   /* Модалка */
   .backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center;
             padding:18px; z-index:9999; opacity:0; transition:opacity .18s ease;}
@@ -105,6 +106,9 @@
   .modal h3{font-size:18px; margin:2px 0; color:var(--ink);}
   .modal .content{color:var(--muted); font-size:14px; line-height:1.4; max-height:50vh; overflow:auto;}
   .close{appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);} 
+
+  /* Только для нижней — в одну строку */
+  #helpTile{ white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -134,7 +138,8 @@
 
         <div class="tiles" id="zonesGrid"></div>
 
-        <div class="tile-red" id="helpTile">Как узнать свой<br>анаэробный порог</div>
+        <!-- Нижняя кнопка: идентична верхней, по центру, в одну строку -->
+        <button class="btn-red" id="helpTile">Как узнать свой анаэробный порог</button>
       </div>
     </div>
   </div>
@@ -322,3 +327,6 @@
 </script>
 </body>
 </html>
+
+
+       
