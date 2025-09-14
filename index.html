@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#e9edf4" />
+<title>Зоны от АНП — compact hearts</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#e9edf4; --ink:#2b2f36; --muted:#6e7785; --panel:#e9edf4;
+    --accent:#EF233C;
+    --shadow-dark:#c8cdd6; --shadow-light:#ffffff; --radius:20px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%; overflow-x:hidden;}
+  body{
+    margin:0; color:var(--ink); font-family:'Bebas Neue',system-ui,-apple-system,Roboto,Arial;
+    background: radial-gradient(1200px 900px at 50% -10%, #f5f8fc 0%, transparent 70%), var(--bg);
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+
+  .viewport{min-height:100svh; padding:clamp(8px,2.5vh,18px); display:flex; align-items:center; justify-content:center;}
+  .shell{width:min(480px,100%);} 
+
+  .card{
+    background:var(--panel); border-radius:28px; padding:16px 14px;
+    box-shadow:14px 14px 28px var(--shadow-dark), -14px -14px 28px var(--shadow-light);
+    overflow:hidden;
+  }
+
+  /* РАДАР — теперь сверху */
+  .radar{position:relative; height:120px; margin:4px 0 14px; border-radius:22px; overflow:hidden;
+         background:var(--panel); box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light);} 
+  .heart{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+         width:64px; height:64px; border-radius:50%; display:grid; place-items:center; color:#fff;
+         background:radial-gradient(circle at 30% 30%, #ff5a6f, var(--accent));
+         box-shadow:0 10px 18px rgba(239,35,60,.22), inset 0 1px 0 rgba(255,255,255,.35);} 
+  .heart:before{content:"❤"; font-size:26px;}
+  .ecg-wrap{position:absolute; left:14px; right:14px; bottom:10px; height:44px;}
+  svg.ecg{width:100%; height:100%}
+  .trace{fill:none; stroke:var(--accent); stroke-width:2.5; stroke-dasharray:560 560; stroke-dashoffset:560; animation:draw 3.2s linear infinite;}
+  @keyframes draw{from{stroke-dashoffset:560;} to{stroke-dashoffset:0;}}
+
+  /* СЕТКА КАРТОЧЕК */
+  .tiles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:8px; margin-bottom:14px; width:100%;}
+  @media (max-width:360px){ .tiles{ grid-template-columns:minmax(0,1fr); } }
+
+  .tile{ background:var(--panel); border-radius:var(--radius); padding:12px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px;
+    box-shadow:8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light); cursor:pointer; }
+
+  /* Пульс анимация */
+  .tile.pulse{ animation:pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse{ 0%{ transform:scale(1); box-shadow:8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);} 50%{ transform:scale(1.02); box-shadow:12px 12px 22px rgba(0,0,0,.06), -12px -12px 22px rgba(255,255,255,.9);} 100%{ transform:scale(1); box-shadow:8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);} }
+
+  .zone-row{display:flex; align-items:center; justify-content:center; gap:6px;}
+  .zone-title{font-size:16px; color:var(--ink);} 
+  .hearts{display:flex; gap:2px;}
+  .hearts span{ font-size:9px; line-height:1; color:#bbb; }
+  .hearts span.active{color:var(--accent);} 
+
+  .zone-desc{font-size:14px; color:var(--muted);} 
+  .num{font-size:22px;}
+
+  /* Кнопки */
+  .tile-red,.btn-red{ background:linear-gradient(180deg,#ff5a6f,var(--accent)); border:none; color:#fff; text-align:center; padding:14px; border-radius:20px; display:flex; justify-content:center; align-items:center;
+    box-shadow:10px 10px 18px rgba(239,35,60,.2), -8px -8px 18px rgba(255,255,255,.6), inset 0 1px 0 rgba(255,255,255,.25); transition:transform .1s ease; cursor:pointer; }
+  .tile-red{grid-column:1 / -1; font-size:16px; margin-top:14px;} 
+  .btn-red{width:100%; margin-top:10px; font-size:18px; max-width:440px;}
+  .pressed{transform:scale(.97);} 
+
+  /* Форма — теперь ПОД радаром */
+  .form{display:flex; flex-direction:column; align-items:center; gap:8px; margin:0 0 14px;}
+  .form .hint{font-size:14px; color:var(--muted);} 
+  label{ color:var(--muted); font-size:16px;}
+  .input{ height:50px; width:100%; max-width:320px; text-align:center; border-radius:16px; outline:none; padding:0 14px; font-size:20px; color:var(--ink); border:0; background:var(--panel); box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light); }
+
+  /* Модалка */
+  .backdrop{position:fixed; inset:0; background:rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; padding:18px; z-index:50; opacity:0; visibility:hidden; transition:opacity .18s ease, visibility 0s linear .18s;}
+  .backdrop.show{opacity:1; visibility:visible;}
+  .modal{width:min(380px,100%); background:var(--panel); border-radius:20px; padding:14px 16px; text-align:left; box-shadow:14px 14px 28px var(--shadow-dark), -14px -14px 28px var(--shadow-light);} 
+  .modal header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .modal h3{font-size:20px; margin:2px 0;}
+  .modal .content{color:var(--muted); font-size:16px; line-height:1.3; max-height:50vh; overflow:auto;}
+  .close{appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);} 
+</style>
+</head>
+<body>
+  <div class="viewport">
+    <div class="shell">
+      <div class="card">
+
+        <!-- РАДАР НА САМОМ ВЕРХУ -->
+        <div class="radar">
+          <div class="heart"></div>
+          <div class="ecg-wrap">
+            <svg class="ecg" viewBox="0 0 600 100" preserveAspectRatio="none">
+              <path class="trace" d="M0 60 C20 58,35 62,55 60 L80 60 90 50 100 70 110 40 120 75 130 60
+              C160 58,190 62,220 60 L240 60 250 50 260 70 270 45 280 75 290 60
+              C320 58,350 62,380 60 L400 60 410 50 420 70 430 42 440 76 450 60
+              C480 58,520 62,560 60 L600 60"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ФОРМА ПОД РАДАРОМ -->
+        <div class="form">
+          <div style="text-align:center">
+            <label for="anp">Мой анаэробный порог</label>
+            <div class="hint">уд/мин</div>
+          </div>
+          <input id="anp" class="input" type="number" min="60" max="220" value="165" />
+          <button class="btn-red" id="doCalc">Рассчитать мой анаэробный порог</button>
+        </div>
+
+        <!-- ПЛИТКИ ЗОН -->
+        <div class="tiles" id="zonesGrid"></div>
+
+        <!-- КНОПКА ПОДСКАЗКИ САМОМ НИЗУ -->
+        <div class="tile-red" id="helpTile">Как узнать свой<br>анаэробный порог</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА -->
+  <div class="backdrop" id="modal">
+    <div class="modal">
+      <header>
+        <h3 id="modalTitle">Подсказка</h3>
+        <button class="close" id="modalClose" aria-label="Закрыть">×</button>
+      </header>
+      <div class="content" id="modalContent">
+        <p>Беги 1 час максимально равномерно. Средний пульс за 60 минут — твой АНП.</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  let pulseIndex = 0; // текущая пульсирующая карточка
+
+  function calcZones(anp){
+    const r=n=>Math.round(n);
+    return [
+      {name:'ЗОНА 1',desc:'Восстановительная', val:`< ${r(anp*0.85)}`},
+      {name:'ЗОНА 2',desc:'Аэробная',          val:`${r(anp*0.85)} – ${r(anp*0.95)}`},
+      {name:'ЗОНА 3',desc:'Пороговая',         val:`${r(anp*0.95)} – ${r(anp*1.05)}`},
+      {name:'ЗОНА 4',desc:'Субмаксимальная',   val:`${r(anp*1.05)} – ${r(anp*1.15)}`},
+      {name:'ЗОНА 5',desc:'Максимальная',      val:`> ${r(anp*1.15)}`}
+    ];
+  }
+
+  // Описания зон (вставьте ваши подробные тексты при необходимости)
+  function zoneInfo(i){
+    const infos=[
+      {title:'ЗОНА 1 — Восстановительная', html:'<p>Описание зоны 1…</p>'},
+      {title:'ЗОНА 2 — Аэробная база', html:'<p>Описание зоны 2…</p>'},
+      {title:'ЗОНА 3 — Пороговая', html:'<p>Описание зоны 3…</p>'},
+      {title:'ЗОНА 4 — Субмаксимальная', html:'<p>Описание зоны 4…</p>'},
+      {title:'ЗОНА 5 — Максимальная', html:'<p>Описание зоны 5…</p>'},
+    ];
+    return infos[i];
+  }
+
+  function render(){
+    const v = parseInt($('#anp').value,10);
+    if (isNaN(v) || v<60 || v>220) return;
+
+    const list = calcZones(v);
+    const grid = $('#zonesGrid');
+    grid.innerHTML = '';
+
+    list.forEach((z,i)=>{
+      let hearts = '';
+      for(let h=1; h<=5; h++){
+        const active = h<=i+1;
+        const char = active ? '❤' : '♡';
+        hearts += `<span class="${active ? 'active' : ''}">${char}</span>`;
+      }
+      const el = document.createElement('div');
+      el.className = 'tile';
+      const info = zoneInfo(i);
+      el.dataset.index = i;
+      el.dataset.title = info.title;
+      el.dataset.html = info.html;
+      el.innerHTML = `
+        <div class="zone-row">
+          <div class="zone-title">${z.name}</div>
+          <div class="hearts">${hearts}</div>
+        </div>
+        <div class="zone-desc">${z.desc}</div>
+        <div class="num">${z.val}</div>
+      `;
+      el.addEventListener('click', ()=> openInfo(i));
+      grid.appendChild(el);
+    });
+
+    // восстановим последовательную пульсацию, начиная с первой
+    pulseIndex = 0;
+    applyPulse(pulseIndex);
+  }
+
+  function applyPulse(idx){
+    const tiles = document.querySelectorAll('.tile');
+    tiles.forEach(t=>t.classList.remove('pulse'));
+    if(tiles[idx]) tiles[idx].classList.add('pulse');
+  }
+
+  function openInfo(index){
+    const info = zoneInfo(index);
+    $('#modalTitle').textContent = info.title;
+    $('#modalContent').innerHTML = info.html;
+    $('#modal').classList.add('show');
+
+    const onClose = ()=>{
+      $('#modal').classList.remove('show');
+      pulseIndex = Math.min(index+1, 4);
+      applyPulse(pulseIndex);
+      detach();
+    };
+    const onBackdrop = (e)=>{ if(e.target === $('#modal')) onClose(); };
+    const onKey = (e)=>{ if(e.key==='Escape') onClose(); };
+
+    function detach(){
+      $('#modalClose').removeEventListener('click', onClose);
+      $('#modal').removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onKey);
+    }
+
+    $('#modalClose').addEventListener('click', onClose, {once:true});
+    $('#modal').addEventListener('click', onBackdrop, {once:true});
+    document.addEventListener('keydown', onKey, {once:true});
+  }
+
+  function bindPress(el){
+    if(!el) return;
+    const add = ()=> el.classList.add('pressed');
+    const rm  = ()=> el.classList.remove('pressed');
+    el.addEventListener('touchstart', add, {passive:true});
+    el.addEventListener('touchend', rm);
+    el.addEventListener('mousedown', add);
+    el.addEventListener('mouseup', rm);
+    el.addEventListener('mouseleave', rm);
+  }
+
+  // События
+  bindPress($('#doCalc'));
+  bindPress($('#helpTile'));
+  $('#doCalc').addEventListener('click', render);
+  $('#anp').addEventListener('keydown', e=>{ if(e.key==='Enter') render(); });
+  $('#anp').addEventListener('focus', e=> e.target.value = '');
+  $('#helpTile').addEventListener('click', ()=>{
+    $('#modalTitle').textContent = 'Как определить АНП';
+    $('#modalContent').innerHTML = '<p>Беги 1 час максимально равномерно. Средний пульс за 60 минут — твой АНП.</p>';
+    $('#modal').classList.add('show');
+  });
+
+  // Первый рендер
+  render();
+</script>
+</body>
+</html>
+
+
