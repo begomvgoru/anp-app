@@ -20,6 +20,7 @@
     margin:0; color:var(--ink); font-family:'Bebas Neue',system-ui,-apple-system,Roboto,Arial;
     background: var(--bg);
     -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    transition: filter .2s ease;
   }
 
   .viewport{min-height:100svh; padding:clamp(4px,2vh,12px); display:flex; align-items:center; justify-content:center;}
@@ -96,18 +97,46 @@
   .zone-desc{font-size:13px; color:var(--muted);} 
   .num{font-size:20px; font-family:'Bebas Neue',sans-serif;}
 
-  /* Модалка */
-  .backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center;
-            padding:18px; z-index:9999; opacity:0; transition:opacity .18s ease;}
+  /* ====== МОДАЛКА: центр и глассморфизм ====== */
+  .backdrop{
+    position:fixed; inset:0;
+    display:none; align-items:center; justify-content:center;
+    padding:18px; z-index:9999; opacity:0; transition:opacity .18s ease;
+    background:rgba(0,0,0,.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
   .backdrop.show{display:flex; opacity:1;}
-  .modal{width:min(360px,100%); background:var(--panel); border-radius:20px; padding:14px 16px; text-align:left;
-         box-shadow:0 0 20px rgba(0,0,0,.6);} 
+
+  .modal{
+    width:min(420px,100%);
+    border-radius:20px;
+    padding:14px 16px;
+    text-align:left;
+
+    /* ГЛАССМОРФИЗМ */
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
   .modal header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
   .modal h3{font-size:18px; margin:2px 0; color:var(--ink);}
-  .modal .content{color:var(--muted); font-size:14px; line-height:1.4; max-height:50vh; overflow:auto;}
-  .close{appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);} 
+  .modal .content{color:var(--ink); opacity:.9; font-size:14px; line-height:1.4; max-height:70vh; overflow:auto;}
+  .close{
+    appearance:none; border:0; background:transparent; font-size:22px; cursor:pointer; color:var(--muted);
+    transition: transform .08s ease, opacity .2s ease;
+  }
+  .close:active{ transform: scale(.92); opacity:.8; }
 
-  /* Только для нижней — в одну строку */
+  /* Фиксируем скролл боди при открытой модалке */
+  .no-scroll{ overflow: hidden; }
+
+  /* Только для нижней кнопки — в одну строку */
   #helpTile{ white-space:nowrap; }
 </style>
 </head>
@@ -145,7 +174,7 @@
   </div>
 
   <div class="backdrop" id="modal">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <header>
         <h3 id="modalTitle">Подсказка</h3>
         <button class="close" id="modalClose" aria-label="Закрыть">×</button>
@@ -167,9 +196,9 @@
     return [
       {name:'ЗОНА 1',desc:'Восстановительная', val:`< ${r(anp*0.85)}`},
       {name:'ЗОНА 2',desc:'Аэробная',          val:`${r(anp*0.85)} – ${r(anp*0.95)}`},
-      {name:'ЗОНА 3',desc:'Темповая',         val:`${r(anp*0.95)} – ${r(anp*1.05)}`},
-      {name:'ЗОНА 4',desc:'Пороговая',   val:`${r(anp*1.05)} – ${r(anp*1.15)}`},
-      {name:'ЗОНА 5',desc:'интервальная VO₂max',      val:`> ${r(anp*1.15)}`}
+      {name:'ЗОНА 3',desc:'Пороговая',         val:`${r(anp*0.95)} – ${r(anp*1.05)}`},
+      {name:'ЗОНА 4',desc:'Субмаксимальная',   val:`${r(anp*1.05)} – ${r(anp*1.15)}`},
+      {name:'ЗОНА 5',desc:'Максимальная',      val:`> ${r(anp*1.15)}`}
     ];
   }
 
@@ -184,19 +213,12 @@
           <p><strong>Физиология:</strong></p>
           <ul>
             <li>мышцы работают в условиях полного обеспечения кислородом, молочная кислота практически не накапливается;</li>
-            <li>сердце укрепляется мягко — увеличивается ударный объём (за одно сокращение выталкивается больше крови), но без перегрузки;</li>
-            <li>улучшается экономичность дыхания, дыхательные мышцы работают без стресса;</li>
-            <li>включается парасимпатический отдел нервной системы → снижение стресса, улучшение восстановления и сна;</li>
-            <li>активируется липолиз (расщепление жиров), снижается уровень кортизола.</li>
+            <li>сердце укрепляется мягко — увеличивается ударный объём, без перегрузки;</li>
+            <li>улучшается экономичность дыхания;</li>
+            <li>включается парасимпатический отдел нервной системы → снижение стресса;</li>
+            <li>активируется липолиз (расщепление жиров).</li>
           </ul>
-          <p>Зона 1 — это зона восстановления и “фундаментальная база”. Она не делает вас быстрее напрямую, но позволяет организму адаптироваться и выдерживать более тяжёлые тренировки без перетренированности.</p>
-          <p><strong>Тренировки в этой зоне:</strong></p>
-          <ul>
-            <li>Восстановительные пробежки после тяжёлых тренировок или стартов.</li>
-            <li>Разминка и заминка (начала и окончания тренировки).</li>
-            <li>Длительные лёгкие пробежки для новичков.</li>
-            <li>Ходьба и бег трусцой для снижения стресса и наработки общей базы выносливости.</li>
-          </ul>
+          <p><strong>Тренировки:</strong> восстановительные пробежки, разминка/заминка, лёгкие длительные, ходьба/трусца.</p>
         `
       },
       {title:'ЗОНА 2 — Аэробная база', html:'<p>Описание зоны 2…</p>'},
@@ -257,16 +279,20 @@
   function openModal(title, html, advanceIndex){
     $('#modalTitle').textContent = title;
     $('#modalContent').innerHTML = html;
+
+    // Центрируем и фиксируем скролл боди
+    document.body.classList.add('no-scroll');
     $('#modal').classList.add('show');
 
     const onClose = ()=>{
       $('#modal').classList.remove('show');
+      document.body.classList.remove('no-scroll');
+
       if (typeof advanceIndex === 'number') {
         if (advanceIndex < 4) {
           const next = Math.min(advanceIndex + 1, 4);
           applyPulse(next);
         } else {
-          // закрыли 5-ю — сбросить пульсацию в исходное состояние
           const tiles = document.querySelectorAll('.tile');
           tiles.forEach(t=>t.classList.remove('pulse'));
         }
@@ -339,6 +365,7 @@
 </script>
 </body>
 </html>
+
 
 
 
