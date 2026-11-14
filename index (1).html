@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F5F0E7">
+<meta name="description" content="Быстрый расчёт беговых пульсовых зон от ПАНО.">
+<title>Зоны пульса от ПАНО · Бег на пальцах</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F0E7; --ink:#383634; --ink2:#5B5754; --line:#DDD5C7; --tick:#D8D2C6;
+    --rose:#B5707A; --rose-d:#9A5560; --rose-l:#C9989D; --ochre:#C39A48; --ochre-l:#C7AA69;
+    --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+    --sans:'Montserrat',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+  .wrap{width:min(480px,100%);margin:0 auto;padding:22px 18px 40px}
+
+  .brand{display:flex;align-items:center;gap:12px;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2)}
+  .brand:before,.brand:after{content:"";height:1.5px;width:34px;background:var(--ink);opacity:.55}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,8.4vw,38px);line-height:1.12;text-align:center;margin:14px 0 4px;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--rose-d)}
+  .lead{text-align:center;color:var(--ink2);font-size:15px;margin:0 auto 6px;max-width:34ch}
+
+  /* часы */
+  .watch{display:block;width:100%;max-width:400px;margin:6px auto 0;height:auto;overflow:visible}
+  .strap{fill:var(--zc,#B5707A);transition:fill .35s ease}
+  .arc{fill:none;stroke-linecap:butt;cursor:pointer;transition:stroke-width .25s ease}
+  .arc-num{font-family:var(--sans);font-weight:700;font-size:19px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+  .w-zone{font-family:var(--sans);font-weight:700;font-size:27px;letter-spacing:.2em;text-anchor:middle;fill:var(--ink2)}
+  .w-num{font-family:var(--serif);font-weight:700;font-size:88px;text-anchor:middle;fill:var(--ink);font-variant-numeric:lining-nums}
+  .w-num .sgn{font-family:var(--sans);font-weight:600;font-size:66px}
+  .zval .sgn{font-family:var(--sans);font-weight:600;font-size:.86em}
+  .w-unit{font-family:var(--sans);font-weight:600;font-size:25px;text-anchor:middle;fill:var(--ink2)}
+  .w-desc{font-family:var(--sans);font-weight:700;font-size:28px;text-anchor:middle;fill:var(--rose-d)}
+
+  /* форма */
+  .form{margin:8px 0 26px;text-align:center}
+  .form label{display:block;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+  .field{display:inline-flex;align-items:baseline;gap:10px;margin:8px 0 14px;border-bottom:2.5px solid var(--ink);padding:0 6px 2px}
+  .field input{width:132px;border:0;background:transparent;color:var(--ink);font-family:var(--serif);font-weight:700;font-size:46px;line-height:1.1;text-align:center;font-variant-numeric:lining-nums;padding:0;outline:none;-moz-appearance:textfield;appearance:textfield}
+  .field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .field span{font-size:15px;font-weight:600;color:var(--ink2)}
+  .btn{display:block;width:100%;border:0;border-radius:999px;background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:.04em;padding:16px 18px;cursor:pointer;transition:transform .1s ease,background .2s ease}
+  .btn:hover{background:#2A2826}
+  .btn:active{transform:scale(.98)}
+
+  /* список зон */
+  h2{font-family:var(--serif);font-weight:700;font-size:24px;margin:0 0 2px}
+  .sub{color:var(--ink2);font-size:14px;margin:0 0 10px}
+  .zones{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+  .zone{border-bottom:1.5px solid var(--line)}
+  .zone:last-child{border-bottom:1.5px solid var(--ink)}
+  .zhead{display:grid;grid-template-columns:40px 1fr auto 14px;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:13px 2px;cursor:pointer}
+  .badge{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:20px;font-variant-numeric:lining-nums;line-height:1;color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
+  .badge.dark{color:var(--paper)}
+  .zname{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+  .zdesc{font-size:16px;font-weight:600;line-height:1.25}
+  .zval{font-family:var(--serif);font-weight:700;font-size:23px;white-space:nowrap;font-variant-numeric:lining-nums;text-align:right}
+  .chev{width:10px;height:10px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s ease}
+  .zone.open .chev{transform:rotate(-135deg) translate(-2px,-2px)}
+  .zone.open .zhead{padding-bottom:8px}
+  .zbody{display:none;padding:0 2px 16px 54px;font-size:15px}
+  .zone.open .zbody{display:block}
+  .zbody p{margin:0 0 8px}
+  .zbody b{font-weight:700}
+  .zbody ul{margin:0 0 8px;padding:0;list-style:none}
+  .zbody li{position:relative;padding-left:16px;margin-bottom:3px}
+  .zbody li:before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--rose)}
+  .pct{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.06em;padding:3px 12px;border-radius:999px;margin-bottom:10px;color:var(--ink)}
+  .pct.dark{color:var(--paper)}
+  .note{border-left:3px solid var(--ochre);padding:2px 0 2px 12px;margin-top:10px}
+
+  /* подсказка */
+  .help{margin-top:26px;border:1.5px solid var(--ink);border-radius:18px;overflow:hidden}
+  .help summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;font-weight:700;font-size:16px;line-height:1.3}
+  .help summary::-webkit-details-marker{display:none}
+  .help .q{flex:none;width:34px;height:34px;border-radius:50%;background:var(--ochre);color:var(--ink);display:grid;place-items:center;font-family:var(--serif);font-weight:800;font-size:21px}
+  .help .chev{margin-left:auto;flex:none}
+  .help[open] .chev{transform:rotate(-135deg) translate(-2px,-2px)}
+  .help .hbody{padding:0 16px 16px;font-size:15px}
+  .help .hbody p{margin:0 0 8px}
+  .help .hbody p:last-child{margin:0}
+
+  .foot{margin-top:28px;display:flex;align-items:center;gap:12px;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2)}
+  .foot:before,.foot:after{content:"";height:1.5px;flex:1;background:var(--ink);opacity:.4}
+
+  :focus-visible{outline:2.5px solid var(--rose-d);outline-offset:3px;border-radius:8px}
+  .field input:focus-visible{outline:none}
+  .field:focus-within{border-bottom-color:var(--rose-d)}
+  @media (max-width:350px){.zval{font-size:20px}.zbody{padding-left:2px}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="brand">Бег на пальцах</div>
+  <h1>Твои зоны <em>пульса</em></h1>
+  <p class="lead">Считаем от анаэробного порога (ПАНО). Нажми на зону, чтобы узнать, зачем она нужна.</p>
+
+  <svg class="watch" id="watch" viewBox="0 0 800 920" role="img" aria-label="Часы с пульсовыми зонами">
+    <!-- ремешок -->
+    <path class="strap" d="M240 34 Q380 -12 520 34 L536 150 L224 150 Z"/>
+    <path class="strap" d="M240 886 Q380 932 520 886 L536 770 L224 770 Z"/>
+    <circle cx="380" cy="852" r="11" fill="#383634" opacity=".32"/>
+    <circle cx="380" cy="891" r="11" fill="#383634" opacity=".32"/>
+    <!-- корпус -->
+    <g fill="#383634">
+      <rect x="182" y="118" width="396" height="130" rx="36"/>
+      <rect x="182" y="672" width="396" height="130" rx="36"/>
+      <rect x="716" y="420" width="64" height="80" rx="15"/>
+      <rect x="716" y="428" width="56" height="64" rx="14" transform="rotate(-31 380 460)"/>
+      <rect x="716" y="428" width="56" height="64" rx="14" transform="rotate(31 380 460)"/>
+      <circle cx="380" cy="460" r="360"/>
+    </g>
+    <g id="ticks" stroke="#D8D2C6" stroke-width="6"></g>
+    <circle cx="380" cy="460" r="298" fill="#F5F0E7"/>
+    <!-- зоны -->
+    <g id="arcs"></g>
+    <!-- циферблат -->
+    <text class="w-zone" id="wZone" x="380" y="362">ЗОНА 1</text>
+    <text class="w-num" id="wNum" x="380" y="478">&lt; 132</text>
+    <text class="w-unit" x="380" y="524">уд/мин</text>
+    <text class="w-desc" id="wDesc" x="380" y="590">Восстановление</text>
+  </svg>
+
+  <form class="form" id="form" novalidate>
+    <label for="anp">Мой анаэробный порог</label>
+    <div class="field">
+      <span aria-hidden="true" style="visibility:hidden">уд/мин</span>
+      <input id="anp" type="number" min="60" max="220" value="165" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+      <span>уд/мин</span>
+    </div>
+    <button class="btn" type="submit">Рассчитать мои зоны пульса</button>
+  </form>
+
+  <h2>Шесть зон</h2>
+  <p class="sub">Пульс в ударах в минуту</p>
+  <ul class="zones" id="zones" aria-live="polite"></ul>
+
+  <details class="help">
+    <summary><span class="q">?</span><span>Как узнать свой анаэробный порог (ПАНО)</span><span class="chev"></span></summary>
+    <div class="hbody">
+      <p>Беги один час в максимально устойчивом темпе, который можешь выдержать на всём протяжении дистанции. Цель – пройти за 60 минут максимально возможное расстояние. Если не получается всё время бежать, можно чередовать бег и шаг, но старайся поддерживать равномерную нагрузку.</p>
+      <p>Часовой бег – простой полевой тест для оценки анаэробного порога. Средний пульс за этот интервал обычно соответствует индивидуальному порогу.</p>
+    </div>
+  </details>
+
+  <div class="foot">Бег на пальцах</div>
+</main>
+
+<script>
+(function(){
+  var $ = function(s){ return document.querySelector(s); };
+  var NS = 'http://www.w3.org/2000/svg';
+  var CX = 380, CY = 460, R = 272;
+  var COLORS = ['#E1D6B8','#D2BC85','#C39A48','#C9989D','#B5707A','#9A5560'];
+  var DARK = [false,false,false,false,true,true];
+  var lastValidANP = 165;
+  var active = 0;
+
+  /* ===== расчёт: без изменений, как в исходном приложении ===== */
+  var r = function(n){ return Math.round(n); };
+  function toRange(lo, hi){
+    var a = r(lo);
+    var b = r(hi) - 1;
+    if (b < a) b = a;
+    return a + ' – ' + b;
+  }
+  function calcZones(anp){
+    var z1_hi = anp*0.80;
+    var z2_lo = anp*0.80, z2_hi = anp*0.90;
+    var z3_lo = anp*0.90, z3_hi = anp*0.95;
+    var z4_lo = anp*0.95, z4_hi = anp*1.02;
+    var z5_lo = anp*1.02, z5_hi = anp*1.06;
+    var z6_lo = anp*1.06;
+    return [
+      {name:'Зона 1', desc:'Восстановление',        val:'< ' + r(z1_hi)},
+      {name:'Зона 2', desc:'Аэробная выносливость', val:toRange(z2_lo,z2_hi)},
+      {name:'Зона 3', desc:'Аэробная мощность',     val:toRange(z3_lo,z3_hi)},
+      {name:'Зона 4', desc:'Порог (ПАНО)',          val:toRange(z4_lo,z4_hi)},
+      {name:'Зона 5', desc:'VO₂max',                val:toRange(z5_lo,z5_hi)},
+      {name:'Зона 6', desc:'Анаэробная мощность',   val:'> ' + (r(z6_lo) - 1)}
+    ];
+  }
+
+  var INFO = [
+    {pct:'< 80% ПАНО', sut:'очень лёгкая, максимально комфортная нагрузка.', why:'восстановление, расслабление.',
+     ex:['лёгкий бег трусцой после тяжёлых сессий','пешие прогулки','заминка']},
+    {pct:'80–90% ПАНО', sut:'лёгкая, «разговорная» нагрузка, база.', why:'развитие сердечно-сосудистой системы, улучшение выносливости.',
+     ex:['длительные пробежки (long run)','лёгкие кроссы','бег в медленном равномерном темпе'],
+     note:'<b>Типичная ошибка:</b> бежать слишком быстро – скатываться в зону 3.'},
+    {pct:'90–95% ПАНО', sut:'«комфортно тяжело», дыхание учащается.', why:'улучшение формы, подготовка к марафонскому темпу.',
+     ex:['темповые пробежки (30–60 мин)','прогрессивный бег (с выходом в зону 3 в конце)','длинные интервалы (например, 2–3×20 мин)']},
+    {pct:'95–101% ПАНО', sut:'интенсивно и некомфортно, но удержимо.', why:'повышение порога, умение дольше терпеть высокую нагрузку.',
+     ex:['интервалы по 10–20 мин (с коротким отдыхом)','короткие интервалы (например, 3×15 мин)','«часовой тест» – средний пульс ≈ ПАНО']},
+    {pct:'102–106% ПАНО', sut:'выше порога, работа на VO₂max (максимальное потребление кислорода).', why:'повышение максимальной аэробной мощности.',
+     ex:['интервалы по 3–5 мин','5×1000 м или 6×800 м с равным отдыхом','фартлек в быстром темпе']},
+    {pct:'> 106% ПАНО', sut:'почти максимум, короткие усилия.', why:'развитие нервно-мышечной системы, скорость.',
+     ex:['интервалы по 30–90 сек','спринты в горку','ускорения 200–400 м'],
+     note:'<b>Почему 6 зон, а не 5:</b> стандартная «зона 5» разделена на две части – выносливость (зона 5) и мощность (зона 6), чтобы точнее разделять интервальные работы.'}
+  ];
+
+  function getANP(){
+    var v = parseInt($('#anp').value, 10);
+    if (isNaN(v)) v = lastValidANP;
+    v = Math.max(60, Math.min(220, v));
+    lastValidANP = v;
+    $('#anp').value = v;
+    try{ localStorage.setItem('anp', String(v)); }catch(e){}
+    return v;
+  }
+
+  /* ===== часы ===== */
+  function pt(deg, rad){
+    var a = (deg - 90) * Math.PI / 180;
+    return [CX + rad*Math.cos(a), CY + rad*Math.sin(a)];
+  }
+  function buildWatch(){
+    var ticks = $('#ticks');
+    for (var i=0;i<40;i++){
+      var p1 = pt(i*9, 319), p2 = pt(i*9, 342);
+      var l = document.createElementNS(NS,'line');
+      l.setAttribute('x1',p1[0].toFixed(1)); l.setAttribute('y1',p1[1].toFixed(1));
+      l.setAttribute('x2',p2[0].toFixed(1)); l.setAttribute('y2',p2[1].toFixed(1));
+      ticks.appendChild(l);
+    }
+    var arcs = $('#arcs');
+    for (var z=0;z<6;z++){
+      var a0 = z*60 + 1.6, a1 = (z+1)*60 - 1.6;
+      var s = pt(a0,R), e = pt(a1,R);
+      var p = document.createElementNS(NS,'path');
+      p.setAttribute('d','M'+s[0].toFixed(2)+' '+s[1].toFixed(2)+' A'+R+' '+R+' 0 0 1 '+e[0].toFixed(2)+' '+e[1].toFixed(2));
+      p.setAttribute('class','arc');
+      p.setAttribute('stroke',COLORS[z]);
+      p.setAttribute('stroke-width',24);
+      p.dataset.i = z;
+      p.addEventListener('click', onArc);
+      arcs.appendChild(p);
+      var m = pt(z*60+30, R);
+      var t = document.createElementNS(NS,'text');
+      t.setAttribute('x',m[0].toFixed(1)); t.setAttribute('y',m[1].toFixed(1));
+      t.setAttribute('class','arc-num');
+      t.setAttribute('fill', DARK[z] ? '#F5F0E7' : '#383634');
+      t.textContent = z+1;
+      arcs.appendChild(t);
+    }
+  }
+  function onArc(e){ select(+e.currentTarget.dataset.i, true, true); }
+
+  function splitVal(v){
+    var c = v.charAt(0);
+    return (c === '<' || c === '>') ? [c, v.slice(2)] : ['', v];
+  }
+  function valHTML(v){
+    var pr = splitVal(v);
+    return pr[0] ? '<span class="sgn">' + (pr[0] === '<' ? '&lt;' : '&gt;') + '</span>\u00A0' + pr[1] : v;
+  }
+
+  /* ===== список ===== */
+  var zonesData = [];
+  function render(){
+    zonesData = calcZones(getANP());
+    var ul = $('#zones');
+    ul.innerHTML = '';
+    zonesData.forEach(function(z,i){
+      var info = INFO[i];
+      var li = document.createElement('li');
+      li.className = 'zone';
+      var dk = DARK[i] ? ' dark' : '';
+      li.innerHTML =
+        '<button class="zhead" type="button" aria-expanded="false" aria-controls="zb'+i+'">'+
+          '<span class="badge'+dk+'" style="background:'+COLORS[i]+'">'+(i+1)+'</span>'+
+          '<span><span class="zname">'+z.name+'</span><br><span class="zdesc">'+z.desc+'</span></span>'+
+          '<span class="zval">'+valHTML(z.val)+'</span><span class="chev"></span>'+
+        '</button>'+
+        '<div class="zbody" id="zb'+i+'">'+
+          '<span class="pct'+dk+'" style="background:'+COLORS[i]+'">'+info.pct+'</span>'+
+          '<p><b>Суть:</b> '+info.sut+'</p>'+
+          '<p><b>Для чего:</b> '+info.why+'</p>'+
+          '<p><b>Примеры тренировок:</b></p>'+
+          '<ul>'+info.ex.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+
+          (info.note ? '<p class="note">'+info.note+'</p>' : '')+
+        '</div>';
+      li.querySelector('.zhead').addEventListener('click', function(){
+        var isOpen = li.classList.contains('open');
+        select(i, !isOpen, false);
+      });
+      ul.appendChild(li);
+    });
+  }
+
+  function select(i, open, scroll){
+    active = i;
+    var z = zonesData[i];
+    $('#wZone').textContent = z.name.toUpperCase();
+    var wn = $('#wNum'), pr = splitVal(z.val);
+    wn.textContent = '';
+    if (pr[0]){
+      var t1 = document.createElementNS(NS,'tspan');
+      t1.setAttribute('class','sgn'); t1.textContent = pr[0] + '\u00A0';
+      wn.appendChild(t1);
+    }
+    var t2 = document.createElementNS(NS,'tspan');
+    t2.textContent = pr[1];
+    wn.appendChild(t2);
+    $('#wDesc').textContent = z.desc;
+    $('#watch').style.setProperty('--zc', COLORS[i]);
+    document.querySelectorAll('.arc').forEach(function(a,k){ a.setAttribute('stroke-width', k===i ? 38 : 22); });
+    document.querySelectorAll('.zone').forEach(function(li,k){
+      var on = (k===i) && open;
+      li.classList.toggle('open', on);
+      li.querySelector('.zhead').setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    if (scroll){
+      var el = document.querySelectorAll('.zone')[i];
+      if (el && el.scrollIntoView) el.scrollIntoView({block:'nearest', behavior:'smooth'});
+    }
+  }
+
+  function recalc(){
+    var wasOpen = !!document.querySelector('.zone.open');
+    render();
+    select(active, wasOpen, false);
+  }
+
+  /* ===== поле ввода ===== */
+  var anpInput = $('#anp');
+  $('#form').addEventListener('submit', function(e){ e.preventDefault(); recalc(); anpInput.blur(); });
+  anpInput.addEventListener('focus', function(e){ e.target.value = ''; });
+  anpInput.addEventListener('blur', function(e){ if (!e.target.value) e.target.value = lastValidANP; });
+
+  try{
+    var saved = parseInt(localStorage.getItem('anp'), 10);
+    if (!isNaN(saved) && saved >= 60 && saved <= 220){ anpInput.value = saved; lastValidANP = saved; }
+  }catch(e){}
+
+  buildWatch();
+  render();
+  select(0, false, false);
+})();
+</script>
+</body>
+</html>
