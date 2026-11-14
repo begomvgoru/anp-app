@@ -14,23 +14,56 @@
     --rose:#B5707A; --rose-d:#9A5560; --rose-l:#C9989D; --ochre:#C39A48; --ochre-l:#C7AA69;
     --serif:'Playfair Display',Georgia,'Times New Roman',serif;
     --sans:'Montserrat',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    --err:#A3392F; --card:#FBF8F2; --soft:#E7DECF;
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
-  .wrap{width:min(480px,100%);margin:0 auto;padding:22px 18px 40px}
+  html{-webkit-text-size-adjust:100%;height:100%}
+  body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+  button{font:inherit;color:inherit}
+  [hidden]{display:none!important}
 
-  .brand{display:flex;align-items:center;gap:12px;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2)}
-  .brand:before,.brand:after{content:"";height:1.5px;width:34px;background:var(--ink);opacity:.55}
-  h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,8.4vw,38px);line-height:1.12;text-align:center;margin:14px 0 4px;text-wrap:balance}
+  /* ===== оболочка приложения ===== */
+  .app{position:fixed;top:0;left:0;right:0;margin:0 auto;width:min(480px,100%);height:100vh;height:var(--app-h,100dvh);
+    display:flex;flex-direction:column;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  .top{flex:none;padding:10px 18px 0;padding-top:max(10px,env(safe-area-inset-top))}
+  .brand{display:flex;align-items:center;gap:12px;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);margin:0}
+  .brand:before,.brand:after{content:"";height:1.5px;width:26px;background:var(--ink);opacity:.55}
+  .screens{flex:1 1 auto;min-height:0;position:relative}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;padding:10px 18px 12px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  #scr-watch{overflow:hidden}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(24px,7vw,28px);line-height:1.1;text-align:center;margin:0;flex:none}
   h1 em{font-style:normal;color:var(--rose-d)}
-  .lead{text-align:center;color:var(--ink2);font-size:15px;margin:0 auto 6px;max-width:34ch}
 
-  /* часы */
-  .watch{display:block;width:100%;max-width:400px;margin:6px auto 0;height:auto;overflow:visible}
+  /* переключатель режимов */
+  .seg{flex:none;display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:999px;padding:3px;gap:3px}
+  .seg button{border:0;border-radius:999px;background:transparent;color:var(--ink);font-weight:700;font-size:13px;line-height:1;letter-spacing:.04em;padding:10px 6px;min-height:40px;cursor:pointer;transition:background .2s ease,color .2s ease}
+  .seg button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
+
+  /* поле ПАНО */
+  .anp{flex:none;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:10px;border:1.5px solid var(--ink);border-radius:18px;padding:7px 10px;background:var(--card);transition:border-color .2s ease,box-shadow .2s ease;margin:0}
+  .anp:focus-within{border-color:var(--rose-d);box-shadow:0 0 0 3px rgba(154,85,96,.18)}
+  .anp.err{border-color:var(--err);box-shadow:0 0 0 3px rgba(163,57,47,.15)}
+  .anp-mid{display:flex;flex-direction:column;align-items:center;line-height:1;cursor:text;min-width:0}
+  .anp-lbl{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:2px}
+  .anp-row{display:flex;align-items:baseline;justify-content:center;gap:4px}
+  .anp input{width:82px;border:0;background:transparent;color:var(--ink);font-family:var(--serif);font-weight:700;font-size:36px;line-height:1.15;text-align:center;font-variant-numeric:lining-nums;padding:0;margin:0;outline:none;border-radius:0;-webkit-appearance:none;appearance:none}
+  .anp-unit{font-size:14px;font-weight:600;color:var(--ink2)}
+  .step{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .step:active{background:var(--soft)}
+  .step svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;fill:none}
+  .anp-msg{flex:none;margin:-6px 6px 0;font-size:12.5px;font-weight:600;line-height:1.3;color:var(--err)}
+
+  /* блок «Не знаю ПАНО» */
+  .info{flex:none;border:1.5px solid var(--ink);border-radius:18px;padding:11px 14px;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;background:var(--card)}
+  .info .q{width:34px;height:34px;border-radius:50%;background:var(--ochre);color:var(--ink);display:grid;place-items:center;font-family:var(--serif);font-weight:800;font-size:20px}
+  .info p{margin:0;font-size:13.5px;line-height:1.35}
+  .link{border:0;background:none;padding:0;color:var(--rose-d);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
+
+  /* часы: весь SVG масштабируется в свободное место, геометрия внутри не меняется */
+  .watch-wrap{flex:1 1 auto;min-height:150px;position:relative}
+  .watch{position:absolute;inset:0;margin:auto;display:block;width:100%;height:100%;max-width:400px;max-height:460px;overflow:visible}
   .strap{fill:var(--zc,#B5707A);transition:fill .35s ease}
   .arc{fill:none;stroke-linecap:butt;cursor:pointer;transition:stroke-width .25s ease}
-  /* невидимые увеличенные области нажатия на дуги */
   .zg{outline:none;cursor:pointer}
   .zhit{fill:none;stroke:transparent;stroke-width:88;pointer-events:stroke;cursor:pointer}
   .arc-ring{fill:none;stroke:var(--ink);stroke-width:54;opacity:0;pointer-events:none}
@@ -39,40 +72,63 @@
   .w-zone{font-family:var(--sans);font-weight:700;font-size:27px;letter-spacing:.2em;text-anchor:middle;fill:var(--ink2)}
   .w-num{font-family:var(--serif);font-weight:700;font-size:88px;text-anchor:middle;fill:var(--ink);font-variant-numeric:lining-nums}
   .w-num .sgn{font-family:var(--sans);font-weight:600;font-size:66px}
-  .zval .sgn{font-family:var(--sans);font-weight:600;font-size:.86em}
   .w-unit{font-family:var(--sans);font-weight:600;font-size:25px;text-anchor:middle;fill:var(--ink2)}
   .w-desc{font-family:var(--sans);font-weight:700;font-size:28px;text-anchor:middle;fill:var(--rose-d)}
+  .hint{flex:none;text-align:center;font-size:12.5px;line-height:1.3;color:var(--ink2);margin:0}
+  .app.typing .hint{display:none}
 
-  /* форма */
-  .form{margin:8px 0 26px;text-align:center}
-  .form label{display:block;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
-  .field{display:inline-flex;align-items:baseline;gap:10px;margin:8px 0 14px;border-bottom:2.5px solid var(--ink);padding:0 6px 2px}
-  .field input{width:132px;border:0;background:transparent;color:var(--ink);font-family:var(--serif);font-weight:700;font-size:46px;line-height:1.1;text-align:center;font-variant-numeric:lining-nums;padding:0;outline:none;-moz-appearance:textfield;appearance:textfield}
-  .field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-  .field span{font-size:15px;font-weight:600;color:var(--ink2)}
-  .btn{display:block;width:100%;border:0;border-radius:999px;background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:.04em;padding:16px 18px;cursor:pointer;transition:transform .1s ease,background .2s ease}
-  .btn:hover{background:#2A2826}
-  .btn:active{transform:scale(.98)}
+  /* нижняя навигация */
+  .tabbar{flex:none;display:grid;grid-template-columns:repeat(3,1fr);border-top:1.5px solid var(--ink);background:var(--paper);padding:5px 10px;padding-bottom:max(5px,env(safe-area-inset-bottom));position:relative;z-index:30}
+  .app.typing .tabbar{display:none}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--ink2);font-weight:700;font-size:10.5px;line-height:1.1;letter-spacing:.1em;text-transform:uppercase;padding:4px 0;min-height:50px;cursor:pointer}
+  .tab .ic{width:46px;height:28px;border-radius:999px;display:grid;place-items:center;transition:background .2s ease}
+  .tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tab[aria-selected="true"]{color:var(--ink)}
+  .tab[aria-selected="true"] .ic{background:var(--soft)}
+
+  /* заголовки разделов */
+  .sc-head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .sc-head h2{font-family:var(--serif);font-weight:700;font-size:26px;line-height:1.1;margin:0}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;padding:7px 12px;min-height:36px;font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap;cursor:pointer}
+  .chip b{font-family:var(--serif);font-size:16px}
+  .chip.static{cursor:default}
 
   /* список зон */
-  h2{font-family:var(--serif);font-weight:700;font-size:24px;margin:0 0 2px}
-  .sub{color:var(--ink2);font-size:14px;margin:0 0 10px}
-  .zones{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+  .zones{flex:none;list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
   .zone{border-bottom:1.5px solid var(--line)}
   .zone:last-child{border-bottom:1.5px solid var(--ink)}
-  .zhead{display:grid;grid-template-columns:40px 1fr auto 14px;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:13px 2px;cursor:pointer}
+  .zhead{display:grid;grid-template-columns:40px 1fr auto 14px;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:10px 2px;cursor:pointer}
+  .zone.cur .zhead{background:linear-gradient(90deg,var(--soft),rgba(231,222,207,0))}
   .badge{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:20px;font-variant-numeric:lining-nums;line-height:1;color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
   .badge.dark{color:var(--paper)}
   .zname{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
   .zdesc{font-size:16px;font-weight:600;line-height:1.25}
   .zval{font-family:var(--serif);font-weight:700;font-size:23px;white-space:nowrap;font-variant-numeric:lining-nums;text-align:right}
+  .zval .sgn{font-family:var(--sans);font-weight:600;font-size:.86em}
+  .zval small{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink2);margin-left:2px}
   .chev{width:10px;height:10px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s ease}
   .zhead .chev{transform:rotate(-45deg) translate(-2px,-2px)}
+  .foot-note{flex:none;font-size:12px;color:var(--ink2);text-align:center;margin:0}
+
+  /* «Сохранить» */
+  .preview{flex:1 1 auto;min-height:200px;position:relative}
+  .preview img{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 10px 30px rgba(56,54,52,.22),0 0 0 1.5px var(--ink);background:var(--paper)}
+  .preview .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;color:var(--ink2);text-align:center}
+  .btns{flex:none;display:grid;gap:10px}
+  .btn2{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font-weight:700;font-size:15px;line-height:1;letter-spacing:.04em;padding:14px 18px;min-height:50px;cursor:pointer;transition:transform .1s ease,background .2s ease}
+  .btn2:active{transform:scale(.98)}
+  .btn2.pri{background:var(--ink);color:var(--paper)}
+  .btn2[disabled]{opacity:.45;cursor:default}
+  .btn2 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .small{flex:none;font-size:12px;line-height:1.35;color:var(--ink2);text-align:center;margin:0;min-height:1.35em}
+  .empty{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;text-align:center;padding:0 10px}
+  .empty .q{width:52px;height:52px;border-radius:50%;background:var(--ochre);display:grid;place-items:center;font-family:var(--serif);font-weight:800;font-size:28px}
+  .empty p{margin:0;font-size:15px;max-width:30ch}
+
+  /* карточка зоны (bottom sheet): closed / compact / expanded */
   .pct{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.06em;padding:3px 12px;border-radius:999px;color:var(--ink)}
   .pct.dark{color:var(--paper)}
   .note{border-left:3px solid var(--ochre);padding:2px 0 2px 12px;margin-top:10px}
-
-  /* выдвижная карточка зоны (bottom sheet): состояния closed / compact / expanded */
   .sheet-backdrop{position:fixed;inset:0;z-index:40;background:rgba(56,54,52,.42);opacity:0;transition:opacity .3s ease;cursor:pointer}
   .sheet-backdrop.is-open{opacity:.5}
   .sheet-backdrop.is-open.is-expanded{opacity:1}
@@ -124,37 +180,84 @@
   .s-dots{display:flex;gap:4px;align-items:center}
   .s-dots i{display:block;width:12px;height:6px;border-radius:3px;transition:width .25s ease,box-shadow .25s ease}
   .s-dots i.on{width:22px;box-shadow:0 0 0 1.5px var(--ink)}
-  html.sheet-lock,html.sheet-lock body{overflow:hidden}
 
-  /* подсказка */
-  .help{margin-top:26px;border:1.5px solid var(--ink);border-radius:18px;overflow:hidden}
-  .help summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;font-weight:700;font-size:16px;line-height:1.3}
-  .help summary::-webkit-details-marker{display:none}
-  .help .q{flex:none;width:34px;height:34px;border-radius:50%;background:var(--ochre);color:var(--ink);display:grid;place-items:center;font-family:var(--serif);font-weight:800;font-size:21px}
-  .help .chev{margin-left:auto;flex:none}
-  .help[open] .chev{transform:rotate(-135deg) translate(-2px,-2px)}
-  .help .hbody{padding:0 16px 16px;font-size:15px}
-  .help .hbody p{margin:0 0 8px}
-  .help .hbody p:last-child{margin:0}
-
-  .foot{margin-top:28px;display:flex;align-items:center;gap:12px;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2)}
-  .foot:before,.foot:after{content:"";height:1.5px;flex:1;background:var(--ink);opacity:.4}
+  /* модальные панели: «Как узнать ПАНО», картинка для сохранения */
+  .modal-backdrop{position:fixed;inset:0;z-index:60;background:rgba(56,54,52,.42);opacity:0;transition:opacity .25s ease;cursor:pointer}
+  .modal-backdrop.is-open{opacity:1}
+  .modal{position:fixed;left:0;right:0;bottom:0;z-index:61;width:min(480px,100%);margin:0 auto;background:var(--paper);color:var(--ink);border:1.5px solid var(--ink);border-bottom:0;border-radius:26px 26px 0 0;
+    padding:22px 20px 16px;padding-bottom:max(16px,env(safe-area-inset-bottom));max-height:calc(var(--app-h,100dvh)*.85);overflow-y:auto;overscroll-behavior:contain;outline:none;
+    transform:translateY(100%);transition:transform .3s cubic-bezier(.22,.9,.3,1);box-shadow:0 -14px 40px rgba(56,54,52,.22)}
+  .modal.is-open{transform:none}
+  .modal h3{font-family:var(--serif);font-weight:700;font-size:22px;line-height:1.2;margin:0 0 10px}
+  .modal p{margin:0 0 10px;font-size:15px}
+  .modal .btn2{margin-top:8px}
+  .modal.full{top:0;max-height:none;height:var(--app-h,100dvh);border:0;border-radius:0;display:flex;flex-direction:column;gap:12px;align-items:stretch;padding-top:max(14px,env(safe-area-inset-top))}
+  .modal.full img{flex:1 1 auto;min-height:0;width:100%;object-fit:contain;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+  .modal.full p{flex:none;text-align:center;margin:0;font-size:14px}
+  .modal.full .tip{font-size:12.5px;color:var(--ink2)}
+  .modal.full .btn2{flex:none;margin:0}
 
   :focus-visible{outline:2.5px solid var(--rose-d);outline-offset:3px;border-radius:8px}
-  .field input:focus-visible{outline:none}
-  .sheet:focus,.sheet:focus-visible,.zg:focus,.zg:focus-visible{outline:none}
-  html{scrollbar-gutter:stable}
-  .field:focus-within{border-bottom-color:var(--rose-d)}
+  .anp input:focus-visible{outline:none}
+  .sheet:focus,.sheet:focus-visible,.zg:focus,.zg:focus-visible,.modal:focus,.modal:focus-visible{outline:none}
+
+  /* низкие экраны (iPhone SE и т.п.) */
+  @media (max-height:620px){
+    .top{padding-top:max(6px,env(safe-area-inset-top))}
+    .screen{gap:9px;padding-top:7px}
+    h1{font-size:22px}
+    .seg button{min-height:36px;padding:8px 6px}
+    .anp{padding:4px 8px}.anp input{font-size:30px}.step{width:40px;height:40px}
+    .hint{display:none}
+    .sc-head h2{font-size:22px}
+    .foot-note{display:none}
+  }
+  /* список зон ниже 700 px: без подписи «ЗОНА N» (номер есть в кружке) – все шесть без прокрутки */
+  @media (max-height:700px){
+    .zone .zname,.zone .zhead br{display:none}
+    .zhead{padding:8px 2px;gap:10px;grid-template-columns:36px 1fr auto 12px}
+    .zones .badge{width:36px;height:36px;font-size:18px}
+    .zones .zdesc{font-size:14.5px}.zval{font-size:20px}
+  }
   @media (max-width:350px){.zval{font-size:20px}.s-val{font-size:28px}.s-step{padding:0 12px}.s-dots i{width:9px}.s-dots i.on{width:16px}}
+  /* телефон горизонтально: две колонки, часы справа */
+  @media (orientation:landscape) and (max-height:520px){
+    .app{width:min(920px,100%)}
+    .top{display:none}
+    #scr-watch,#scr-save{justify-content:center;padding-right:calc(50% + 12px)}
+    #scr-watch .watch-wrap,#scr-save .preview{position:absolute;top:8px;bottom:8px;right:18px;width:calc(50% - 30px);min-height:0}
+    .tabbar{padding-top:2px;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+    .tab{min-height:42px;flex-direction:row;justify-content:center;gap:8px}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <div class="brand">Бег на пальцах</div>
-  <h1>Твои зоны <em>пульса</em></h1>
-  <p class="lead">Считаем от анаэробного порога (ПАНО). Нажми на зону, чтобы узнать, зачем она нужна.</p>
+<div class="app" id="app">
+  <header class="top"><p class="brand">Бег на пальцах</p></header>
 
+  <main class="screens">
+    <!-- ===== Часы ===== -->
+    <section class="screen" id="scr-watch" role="tabpanel" aria-labelledby="tab-watch">
+      <h1>Твои зоны <em>пульса</em></h1>
+      <div class="seg" role="radiogroup" aria-label="Режим">
+        <button type="button" role="radio" id="modeKnown" aria-checked="true">Знаю ПАНО</button>
+        <button type="button" role="radio" id="modeUnknown" aria-checked="false">Не знаю ПАНО</button>
+      </div>
+      <form class="anp" id="anpBox" novalidate>
+        <button class="step" id="anpMinus" type="button" aria-label="Уменьшить на 1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10"/></svg></button>
+        <label class="anp-mid" for="anp">
+          <span class="anp-lbl">Мой ПАНО</span>
+          <span class="anp-row"><input id="anp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" enterkeyhint="done" autocomplete="off" autocorrect="off" spellcheck="false" value="165" aria-describedby="anpMsg"><span class="anp-unit">уд/мин</span></span>
+        </label>
+        <button class="step" id="anpPlus" type="button" aria-label="Увеличить на 1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M8 3v10"/></svg></button>
+      </form>
+      <p class="anp-msg" id="anpMsg" role="alert" hidden></p>
+      <div class="info" id="unknownInfo" hidden>
+        <span class="q" aria-hidden="true">?</span>
+        <p>Без ПАНО пульс не рассчитать. Ориентируйся на дыхание и ощущения. <button type="button" class="link" id="helpLink">Как узнать ПАНО</button></p>
+      </div>
+      <div class="watch-wrap">
   <svg class="watch" id="watch" viewBox="0 0 800 920" role="img" aria-label="Часы с пульсовыми зонами">
     <!-- ремешок -->
     <path class="strap" d="M240 34 Q380 -12 520 34 L536 150 L224 150 Z"/>
@@ -180,31 +283,43 @@
     <text class="w-unit" x="380" y="524">уд/мин</text>
     <text class="w-desc" id="wDesc" x="380" y="590">Восстановление</text>
   </svg>
+      </div>
+      <p class="hint" id="hint">Нажми на цветную дугу, чтобы узнать о зоне</p>
+    </section>
 
-  <form class="form" id="form" novalidate>
-    <label for="anp">Мой анаэробный порог</label>
-    <div class="field">
-      <span aria-hidden="true" style="visibility:hidden">уд/мин</span>
-      <input id="anp" type="number" min="60" max="220" value="165" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-      <span>уд/мин</span>
-    </div>
-    <button class="btn" type="submit">Рассчитать мои зоны пульса</button>
-  </form>
+    <!-- ===== Зоны ===== -->
+    <section class="screen" id="scr-zones" role="tabpanel" aria-labelledby="tab-zones" hidden>
+      <div class="sc-head"><h2 id="zonesTitle">Мои зоны</h2><button type="button" class="chip" id="zonesChip">ПАНО <b>165</b> · изменить</button></div>
+      <ul class="zones" id="zones"></ul>
+      <p class="foot-note" id="zonesNote">Пульс в ударах в минуту · нажми на зону — подробности</p>
+    </section>
 
-  <h2>Шесть зон</h2>
-  <p class="sub">Пульс в ударах в минуту</p>
-  <ul class="zones" id="zones"></ul>
+    <!-- ===== Сохранить ===== -->
+    <section class="screen" id="scr-save" role="tabpanel" aria-labelledby="tab-save" hidden>
+      <div class="sc-head"><h2>Сохранить</h2><span class="chip static" id="saveChip">1080 × 1920</span></div>
+      <div class="preview" id="preview">
+        <img id="cardImg" alt="Карточка с моими зонами пульса" hidden>
+        <div class="ph" id="cardPh">Готовим картинку…</div>
+      </div>
+      <div class="btns" id="saveBtns">
+        <button type="button" class="btn2 pri" id="btnShare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg><span>Поделиться</span></button>
+        <button type="button" class="btn2" id="btnSave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/></svg><span>Сохранить PNG</span></button>
+      </div>
+      <p class="small" id="saveStatus" aria-live="polite">Картинка для галереи и Stories</p>
+      <div class="empty" id="saveUnknown" hidden>
+        <span class="q" aria-hidden="true">?</span>
+        <p>Чтобы сохранить личные зоны пульса, нужно знать свой ПАНО.</p>
+        <button type="button" class="btn2 pri" id="toKnown">Ввести ПАНО</button>
+      </div>
+    </section>
+  </main>
 
-  <details class="help">
-    <summary><span class="q">?</span><span>Как узнать свой анаэробный порог (ПАНО)</span><span class="chev"></span></summary>
-    <div class="hbody">
-      <p>Беги один час в максимально устойчивом темпе, который можешь выдержать на всём протяжении дистанции. Цель – пройти за 60 минут максимально возможное расстояние. Если не получается всё время бежать, можно чередовать бег и шаг, но старайся поддерживать равномерную нагрузку.</p>
-      <p>Часовой бег – простой полевой тест для оценки анаэробного порога. Средний пульс за этот интервал обычно соответствует индивидуальному порогу.</p>
-    </div>
-  </details>
-
-  <div class="foot">Бег на пальцах</div>
-</main>
+  <nav class="tabbar" role="tablist" aria-label="Разделы">
+    <button class="tab" id="tab-watch" role="tab" aria-controls="scr-watch" aria-selected="true" type="button"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="8" y="18" width="8" height="4" rx="1"/><circle cx="12" cy="12" r="7"/><path d="M12 8v4l2.5 2"/></svg></span>Часы</button>
+    <button class="tab" id="tab-zones" role="tab" aria-controls="scr-zones" aria-selected="false" type="button" tabindex="-1"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="6" r="1.6"/><circle cx="5" cy="12" r="1.6"/><circle cx="5" cy="18" r="1.6"/><path d="M10 6h10M10 12h10M10 18h10"/></svg></span>Зоны</button>
+    <button class="tab" id="tab-save" role="tab" aria-controls="scr-save" aria-selected="false" type="button" tabindex="-1"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/></svg></span>Сохранить</button>
+  </nav>
+</div>
 
 <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
 <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sName sDesc" tabindex="-1" hidden>
@@ -232,6 +347,21 @@
     <span class="s-dots" id="sDots" aria-hidden="true"></span>
     <button class="s-step next" id="sNext" type="button"><span id="sNextT">Зона 2</span><span class="chev" aria-hidden="true"></span></button>
   </nav>
+</section>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden></div>
+<section class="modal" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle" tabindex="-1" hidden>
+  <h3 id="helpTitle">Как узнать свой ПАНО</h3>
+  <p>Пульс на пороге анаэробного обмена (ПАНО) индивидуален. Формулы вроде «220 − возраст» дают большую ошибку, поэтому приложение их не использует.</p>
+  <p>Чтобы определить свой порог, обратись к специалисту – спортивному врачу или тренеру. Когда узнаешь пульс на ПАНО, выбери «Знаю ПАНО» и введи его.</p>
+  <p>А пока ориентируйся на дыхание и ощущения: на часах показан уровень усилия по шкале от 1 до 10.</p>
+  <button type="button" class="btn2 pri" data-close>Понятно</button>
+</section>
+<section class="modal full" id="shot" role="dialog" aria-modal="true" aria-label="Картинка с зонами" tabindex="-1" hidden>
+  <img id="shotImg" alt="Мои зоны пульса – Бег на пальцах">
+  <p id="shotTip">Нажми и удерживай картинку, затем выбери «Сохранить в Фото».</p>
+  <p class="tip" id="shotTip2" hidden>Не получается? Открой страницу в браузере: меню ⋯ → «Открыть в браузере».</p>
+  <button type="button" class="btn2" data-close>Закрыть</button>
 </section>
 
 <script>
@@ -286,15 +416,31 @@
      note:'<b>Почему 6 зон, а не 5:</b> стандартная «зона 5» разделена на две части – выносливость (зона 5) и мощность (зона 6), чтобы точнее разделять интервальные работы.'}
   ];
 
-  function getANP(){
-    var v = parseInt($('#anp').value, 10);
-    if (isNaN(v)) v = lastValidANP;
-    v = Math.max(60, Math.min(220, v));
-    lastValidANP = v;
-    $('#anp').value = v;
-    try{ localStorage.setItem('anp', String(v)); }catch(e){}
-    return v;
-  }
+
+  /* ===== режим «Не знаю ПАНО»: разговорный тест и шкала ощущений 1–10.
+     ЧЕРНОВИК для тестовой версии – тексты не утверждены как научные. ===== */
+  var FEEL = [
+    {rpe:'1–2',  talk:'Говорю свободно',      text:'очень легко. Можно говорить без пауз, дыхание спокойное.'},
+    {rpe:'3–4',  talk:'Говорю предложениями', text:'легко. Свободно говоришь целыми предложениями, так можно бежать час и дольше.'},
+    {rpe:'5–6',  talk:'Короткие фразы',       text:'умеренно тяжело. Получаются только короткие фразы, дыхание заметно глубже.'},
+    {rpe:'7',    talk:'Отдельные слова',      text:'тяжело, но под контролем. Только отдельные слова. Подготовленный бегун держит такое усилие примерно до часа.'},
+    {rpe:'8–9',  talk:'1–2 слова',            text:'очень тяжело. Одно-два слова, дыхание на пределе; отрезки по 3–5 минут.'},
+    {rpe:'9–10', talk:'Говорить невозможно',  text:'почти максимум, говорить невозможно; отрезки до 30–90 секунд. Пульс за таким усилием не успевает – ориентируйся на ощущения.'}
+  ];
+
+  var store = {
+    get: function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set: function(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  };
+  var mode = store.get('anpMode') === 'unknown' ? 'unknown' : 'known';
+  var tab = 'watch';
+  var appEl = $('#app');
+  var UA = navigator.userAgent || '';
+  var IS_IOS = /iP(hone|ad|od)/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+  var IN_APP = /Instagram|FBAN|FBAV|FB_IAB|Line\//i.test(UA);
+
+  function setAppHeight(){ document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px'); }
+  setAppHeight();
 
   /* ===== часы ===== */
   function pt(deg, rad){
@@ -368,22 +514,23 @@
     return pr[0] ? '<span class="sgn">' + (pr[0] === '<' ? '&lt;' : '&gt;') + '</span>\u00A0' + pr[1] : v;
   }
 
-  /* ===== список ===== */
+
+  /* ===== зоны: список, часы, подписи ===== */
   var zonesData = [];
   function render(){
-    zonesData = calcZones(getANP());
+    zonesData = calcZones(lastValidANP);
     var ul = $('#zones');
     ul.innerHTML = '';
     zonesData.forEach(function(z,i){
-      var info = INFO[i];
-      var li = document.createElement('li');
-      li.className = 'zone';
       var dk = DARK[i] ? ' dark' : '';
+      var v = mode === 'known' ? valHTML(z.val) : FEEL[i].rpe + '<small>/10</small>';
+      var li = document.createElement('li');
+      li.className = 'zone' + (i === active ? ' cur' : '');
       li.innerHTML =
         '<button class="zhead" type="button" aria-haspopup="dialog" aria-controls="sheet">'+
           '<span class="badge'+dk+'" style="background:'+COLORS[i]+'">'+(i+1)+'</span>'+
           '<span><span class="zname">'+z.name+'</span><br><span class="zdesc">'+z.desc+'</span></span>'+
-          '<span class="zval">'+valHTML(z.val)+'</span><span class="chev"></span>'+
+          '<span class="zval">'+v+'</span><span class="chev"></span>'+
         '</button>';
       li.querySelector('.zhead').addEventListener('click', function(e){
         select(i);
@@ -391,47 +538,225 @@
       });
       ul.appendChild(li);
     });
-    // подписи дуг для экранного диктора
     document.querySelectorAll('.zg').forEach(function(g,k){
       var z = zonesData[k];
-      g.setAttribute('aria-label', z.name + ', ' + z.desc + ', ' + z.val.replace('<','менее').replace('>','более') + ' уд/мин');
+      g.setAttribute('aria-label', z.name + ', ' + z.desc + ', ' + (mode === 'known'
+        ? z.val.replace('<','менее').replace('>','более') + ' уд/мин'
+        : 'усилие ' + FEEL[k].rpe + ' из 10'));
     });
+    updateChrome();
   }
 
   function select(i){
     active = i;
     var z = zonesData[i];
     $('#wZone').textContent = z.name.toUpperCase();
-    var wn = $('#wNum'), pr = splitVal(z.val);
+    var wn = $('#wNum');
     wn.textContent = '';
-    if (pr[0]){
-      var t1 = document.createElementNS(NS,'tspan');
-      t1.setAttribute('class','sgn'); t1.textContent = pr[0] + '\u00A0';
-      wn.appendChild(t1);
+    if (mode === 'known'){
+      var pr = splitVal(z.val);
+      if (pr[0]){
+        var t1 = document.createElementNS(NS,'tspan');
+        t1.setAttribute('class','sgn'); t1.textContent = pr[0] + ' ';
+        wn.appendChild(t1);
+      }
+      var t2 = document.createElementNS(NS,'tspan');
+      t2.textContent = pr[1];
+      wn.appendChild(t2);
+      $('#watch .w-unit').textContent = 'уд/мин';
+      $('#wDesc').textContent = z.desc;
+    } else {
+      var t3 = document.createElementNS(NS,'tspan');
+      t3.textContent = FEEL[i].rpe;
+      wn.appendChild(t3);
+      $('#watch .w-unit').textContent = 'из 10 · по ощущениям';
+      $('#wDesc').textContent = FEEL[i].talk;
     }
-    var t2 = document.createElementNS(NS,'tspan');
-    t2.textContent = pr[1];
-    wn.appendChild(t2);
-    $('#wDesc').textContent = z.desc;
     $('#watch').style.setProperty('--zc', COLORS[i]);
     document.querySelectorAll('.arc').forEach(function(a,k){ a.setAttribute('stroke-width', k===i ? 38 : 22); });
+    document.querySelectorAll('#zones .zone').forEach(function(li,k){ li.classList.toggle('cur', k === i); });
     if (state !== 'closed') fillSheet(i);
   }
 
   function recalc(){
     render();
     select(active);
+    cardDirty = true;
+    if (tab === 'save') prepareCard();
+  }
+
+  /* оформление, зависящее от режима */
+  function updateChrome(){
+    var known = mode === 'known';
+    $('#modeKnown').setAttribute('aria-checked', known ? 'true' : 'false');
+    $('#modeUnknown').setAttribute('aria-checked', known ? 'false' : 'true');
+    $('#modeKnown').tabIndex = known ? 0 : -1;
+    $('#modeUnknown').tabIndex = known ? -1 : 0;
+    $('#anpBox').hidden = !known;
+    if (!known) $('#anpMsg').hidden = true;
+    $('#unknownInfo').hidden = known;
+    $('#hint').textContent = known ? 'Нажми на цветную дугу, чтобы узнать о зоне' : 'Числа – усилие по шкале 1–10, а не пульс';
+    $('#zonesTitle').textContent = known ? 'Мои зоны' : 'Зоны по ощущениям';
+    $('#zonesChip').innerHTML = known ? 'ПАНО <b>' + lastValidANP + '</b> · изменить' : 'Ввести ПАНО';
+    $('#zonesNote').textContent = known ? 'Пульс в ударах в минуту · нажми на зону – подробности' : 'Усилие по шкале 1–10 · введи ПАНО, чтобы получить пульс';
+    $('#preview').hidden = !known; $('#saveBtns').hidden = !known; $('#saveStatus').hidden = !known; $('#saveChip').hidden = !known;
+    $('#saveUnknown').hidden = known;
+  }
+
+  function setMode(m){
+    if (m === mode) return;
+    mode = m;
+    store.set('anpMode', m);
+    recalc();
+  }
+  function segKey(e){
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key) < 0) return;
+    e.preventDefault();
+    setMode(mode === 'known' ? 'unknown' : 'known');
+    focusNoScroll(mode === 'known' ? $('#modeKnown') : $('#modeUnknown'));
+  }
+  $('#modeKnown').addEventListener('click', function(){ setMode('known'); });
+  $('#modeUnknown').addEventListener('click', function(){ setMode('unknown'); });
+  $('#modeKnown').addEventListener('keydown', segKey);
+  $('#modeUnknown').addEventListener('keydown', segKey);
+
+  /* ===== разделы (без записей в истории браузера) ===== */
+  var TABS = ['watch','zones','save'];
+  function setTab(t){
+    if (t === tab) return;
+    tab = t;
+    TABS.forEach(function(n){
+      var on = n === t, b = $('#tab-'+n);
+      $('#scr-'+n).hidden = !on;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+    if (t === 'save') prepareCard();
+  }
+  TABS.forEach(function(n, k){
+    var b = $('#tab-'+n);
+    b.addEventListener('click', function(){ setTab(n); });
+    b.addEventListener('keydown', function(e){
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      var nn = TABS[(k + d + 3) % 3];
+      setTab(nn); focusNoScroll($('#tab-'+nn));
+    });
+  });
+  function goEnterANP(){
+    setMode('known');
+    setTab('watch');
+    var inp = $('#anp');
+    inp.focus();   // синхронно в обработчике нажатия – так iOS открывает клавиатуру
+  }
+  $('#zonesChip').addEventListener('click', goEnterANP);
+  $('#toKnown').addEventListener('click', goEnterANP);
+
+  /* ===== поле ПАНО ===== */
+  var anpInput = $('#anp'), anpBox = $('#anpBox'), anpMsg = $('#anpMsg'), msgTimer = 0;
+  function showMsg(text){
+    clearTimeout(msgTimer);
+    anpMsg.textContent = text || '';
+    anpMsg.hidden = !text;
+    anpBox.classList.toggle('err', !!text);
+    anpInput.setAttribute('aria-invalid', text ? 'true' : 'false');
+  }
+  function setANP(v){
+    lastValidANP = v;
+    store.set('anp', String(v));
+    recalc();
+  }
+  anpInput.addEventListener('input', function(){
+    var s = anpInput.value.replace(/\D/g,'').slice(0,3);
+    if (s !== anpInput.value) anpInput.value = s;
+    var v = parseInt(s, 10);
+    if (!isNaN(v) && v >= 60 && v <= 220){
+      showMsg('');
+      if (v !== lastValidANP) setANP(v);         // пересчёт сразу, без кнопки
+    } else if (s.length === 3 || (!isNaN(v) && v > 220)){
+      showMsg('Введи значение от 60 до 220 уд/мин');
+    } else {
+      showMsg('');
+    }
+  });
+  function commitANP(){
+    var v = parseInt(anpInput.value, 10);
+    if (isNaN(v)){ anpInput.value = lastValidANP; showMsg(''); return; }
+    if (v < 60 || v > 220){
+      anpInput.value = lastValidANP;
+      showMsg('Допустимо от 60 до 220 уд/мин. Оставили ' + lastValidANP + '.');
+      msgTimer = setTimeout(function(){ showMsg(''); }, 5000);
+      return;
+    }
+    anpInput.value = v;
+  }
+  anpInput.addEventListener('focus', function(){
+    appEl.classList.add('typing');
+    setTimeout(function(){ try{ anpInput.setSelectionRange(0, anpInput.value.length); }catch(e){} }, 0);
+  });
+  anpInput.addEventListener('blur', function(){
+    appEl.classList.remove('typing');
+    commitANP();
+  });
+  anpBox.addEventListener('submit', function(e){ e.preventDefault(); anpInput.blur(); });
+  function bump(d){
+    var v = Math.max(60, Math.min(220, lastValidANP + d));
+    anpInput.value = v;
+    showMsg('');
+    if (v !== lastValidANP) setANP(v);
+  }
+  [['#anpMinus',-1],['#anpPlus',1]].forEach(function(p){
+    var b = $(p[0]), t1 = 0, t2 = 0, held = false;
+    function stop(){ clearTimeout(t1); clearInterval(t2); }
+    b.addEventListener('pointerdown', function(){
+      held = false; stop();
+      t1 = setTimeout(function(){ held = true; bump(p[1]); t2 = setInterval(function(){ bump(p[1]); }, 80); }, 450);
+    });
+    ['pointerup','pointerleave','pointercancel'].forEach(function(ev){ b.addEventListener(ev, stop); });
+    b.addEventListener('click', function(){ if (held){ held = false; return; } bump(p[1]); });
+    b.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  });
+
+  /* ===== «Назад» закрывает открытую панель: одна запись истории на текущем адресе ===== */
+  var histPushed = false, histBackPending = false, overlayClose = null;
+  function overlayOpened(closeFn){
+    overlayClose = closeFn;
+    if (!histPushed){
+      try{ history.pushState({anpSheet:true}, ''); histPushed = true; }catch(e){ histPushed = false; }
+    }
+  }
+  function overlayClosed(fromHistory){
+    overlayClose = null;
+    if (histPushed){
+      histPushed = false;
+      if (!fromHistory){ histBackPending = true; history.back(); }
+    }
+  }
+  window.addEventListener('popstate', function(){
+    if (histBackPending){ histBackPending = false; return; }
+    histPushed = false;
+    if (overlayClose) overlayClose(true);
+  });
+  // после перезагрузки на «нашей» записи истории – просто снять пометку
+  try{ if (history.state && history.state.anpSheet) history.replaceState(null, ''); }catch(e){}
+
+  function focusNoScroll(el){
+    if (!el || !el.focus) return;
+    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
+  }
+  function setInert(on){
+    if ('inert' in appEl) appEl.inert = on;
+    else if (on) appEl.setAttribute('aria-hidden','true'); else appEl.removeAttribute('aria-hidden');
   }
 
   /* ===== выдвижная карточка зоны: состояния closed / compact / expanded ===== */
   var sheet = $('#sheet'), backdrop = $('#sheetBackdrop'), sheetBody = $('#sheetBody');
   var sheetHead = $('#sheetHead'), sheetNav = $('#sheetNav'), grabBtn = $('#sGrab'), moreEl = $('#sMore');
-  var mainEl = $('main');
   var state = 'closed';                 // 'closed' | 'compact' | 'expanded'
-  var compactH = 0, expandedH = 0;      // высоты в px, от реально доступной высоты окна
-  var twoLevels = true;                 // false – экран слишком низкий для двух уровней (напр. горизонтально)
+  var compactH = 0, expandedH = 0;      // px, от реально доступной высоты окна
+  var twoLevels = true;                 // false – экран слишком низкий для двух уровней
   var opener = null, hideTimer = null, suppressClickUntil = 0;
-  var histPushed = false, histBackPending = false;
 
   (function buildDots(){
     var dots = $('#sDots');
@@ -439,17 +764,19 @@
   })();
 
   function fillContent(i){
-    var z = zonesData[i], info = INFO[i], dk = DARK[i] ? ' dark' : '';
+    var z = zonesData[i], info = INFO[i], dk = DARK[i] ? ' dark' : '', known = mode === 'known';
     sheet.style.setProperty('--zc', COLORS[i]);
     var b = $('#sBadge');
     b.className = 'badge' + dk; b.style.background = COLORS[i]; b.textContent = i+1;
     $('#sName').textContent = z.name;
     $('#sDesc').textContent = z.desc;
-    $('#sVal').innerHTML = valHTML(z.val);
+    $('#sVal').innerHTML = known ? valHTML(z.val) : FEEL[i].rpe;
+    sheet.querySelector('.s-unit').textContent = known ? 'уд/мин' : 'из 10 · по ощущениям';
     var pc = $('#sPct');
-    pc.className = 'pct' + dk; pc.style.background = COLORS[i]; pc.textContent = info.pct;
-    $('#sSut').innerHTML = '<b>Суть:</b> '+info.sut;
+    pc.className = 'pct' + dk; pc.style.background = COLORS[i]; pc.textContent = known ? info.pct : FEEL[i].talk;
+    $('#sSut').innerHTML = known ? '<b>Суть:</b> '+info.sut : '<b>Ощущения:</b> '+FEEL[i].text;
     moreEl.innerHTML =
+      (known ? '' : '<p><b>Суть:</b> '+info.sut+'</p>')+
       '<p><b>Для чего:</b> '+info.why+'</p>'+
       '<p><b>Примеры тренировок:</b></p>'+
       '<ul>'+info.ex.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+
@@ -466,18 +793,13 @@
     var f = document.activeElement;
     fillContent(i);
     sheetBody.scrollTop = 0;
-    // фокус не теряется, если кнопка-стрелка стала неактивной на краю
     if (f && f.disabled){ focusNoScroll(f.id === 'sPrev' ? $('#sNext') : $('#sPrev')); }
   }
 
-  function availH(){
-    return window.innerHeight || document.documentElement.clientHeight;
-  }
-  // компактная высота = естественная высота компактной композиции (по самой высокой из шести зон),
-  // чтобы при переключении стрелками карточка не прыгала; не выше развёрнутой
+  // компактная высота = естественная высота компактной композиции (по самой высокой из шести зон)
   function measure(){
-    var H = availH();
-    document.documentElement.style.setProperty('--app-h', H + 'px');
+    setAppHeight();
+    var H = window.innerHeight || document.documentElement.clientHeight;
     expandedH = Math.floor(H * 0.74);
     var cs = getComputedStyle(sheetBody);
     var chrome = (sheet.offsetHeight - sheet.clientHeight) + grabBtn.offsetHeight + sheetNav.getBoundingClientRect().height +
@@ -497,7 +819,6 @@
     moreEl.style.visibility = p > 0 ? 'visible' : '';
     moreEl.style.opacity = p > 0 ? String(Math.min(1, p)) : '';
   }
-
   function applyState(animate){
     var exp = state === 'expanded';
     sheet.classList.toggle('is-compact', state === 'compact');
@@ -513,7 +834,6 @@
     if ('inert' in moreEl) moreEl.inert = !exp; else moreEl.setAttribute('aria-hidden', exp ? 'false' : 'true');
     sheetBody.tabIndex = exp ? 0 : -1;
   }
-
   function setState(next){
     if (!twoLevels && next === 'compact') next = 'expanded';
     state = next;
@@ -521,13 +841,9 @@
     applyState(true);
   }
 
-  function focusNoScroll(el){
-    if (!el || !el.focus) return;
-    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
-  }
-
   function openSheet(i, from){
     if (state !== 'closed'){ fillSheet(i); return; }
+    if (document.activeElement === anpInput) anpInput.blur();
     opener = from || null;
     clearTimeout(hideTimer);
     sheet.style.transform = ''; sheet.style.transition = '';
@@ -537,22 +853,17 @@
     fillSheet(i);
     state = twoLevels ? 'compact' : 'expanded';
     applyState(false);
-    void sheet.offsetHeight; // зафиксировать стартовое положение для анимации
+    void sheet.offsetHeight;
     sheet.classList.add('is-open'); backdrop.classList.add('is-open');
-    document.documentElement.classList.add('sheet-lock');
-    if ('inert' in mainEl) mainEl.inert = true; else mainEl.setAttribute('aria-hidden','true');
+    setInert(true);
     focusNoScroll(sheet);
     document.addEventListener('keydown', onSheetKey);
     document.addEventListener('touchstart', onTouchStart, {passive:true});
     document.addEventListener('touchmove', onTouchMove, {passive:false});
     document.addEventListener('touchend', onTouchEnd);
     document.addEventListener('touchcancel', onTouchEnd);
-    // «Назад» на Android закрывает карточку: одна запись истории на текущем адресе
-    if (!histPushed){
-      try{ history.pushState({anpSheet:true}, ''); histPushed = true; }catch(e){ histPushed = false; }
-    }
+    overlayOpened(closeSheet);
   }
-
   function closeSheet(fromHistory){
     if (state === 'closed') return;
     state = 'closed';
@@ -561,8 +872,7 @@
     sheet.classList.remove('is-open'); backdrop.classList.remove('is-open', 'is-expanded');
     sheet.style.transform = ''; backdrop.style.opacity = '';
     revealMore(0);
-    document.documentElement.classList.remove('sheet-lock');
-    if ('inert' in mainEl) mainEl.inert = false; else mainEl.removeAttribute('aria-hidden');
+    setInert(false);
     document.removeEventListener('keydown', onSheetKey);
     document.removeEventListener('touchstart', onTouchStart, {passive:true});
     document.removeEventListener('touchmove', onTouchMove, {passive:false});
@@ -575,33 +885,21 @@
     }, 360);
     focusNoScroll(opener);
     opener = null;
-    if (histPushed){
-      histPushed = false;
-      if (!fromHistory){ histBackPending = true; history.back(); }
-    }
+    overlayClosed(fromHistory === true);
   }
-
-  window.addEventListener('popstate', function(){
-    if (histBackPending){ histBackPending = false; return; }
-    histPushed = false;
-    if (state !== 'closed') closeSheet(true);
-  });
-  // после перезагрузки на «нашей» записи истории – просто снять пометку
-  try{ if (history.state && history.state.anpSheet) history.replaceState(null, ''); }catch(e){}
-
+  function trapTab(e, root, extra){
+    var f = Array.prototype.filter.call(root.querySelectorAll('button' + (extra || '')), function(b){
+      return !b.disabled && b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden';
+    });
+    if (!f.length) return;
+    var first = f[0], last = f[f.length-1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === root)){ e.preventDefault(); focusNoScroll(last); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); focusNoScroll(first); }
+  }
   function onSheetKey(e){
     if (e.key === 'Escape' || e.key === 'Esc'){ e.preventDefault(); closeSheet(); return; }
-    if (e.key === 'Tab'){
-      var f = Array.prototype.filter.call(sheet.querySelectorAll('button, .sheet-body[tabindex="0"]'), function(b){
-        return !b.disabled && b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden';
-      });
-      if (!f.length) return;
-      var first = f[0], last = f[f.length-1];
-      if (e.shiftKey && (document.activeElement === first || document.activeElement === sheet)){ e.preventDefault(); focusNoScroll(last); }
-      else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); focusNoScroll(first); }
-    }
+    if (e.key === 'Tab') trapTab(e, sheet, ', .sheet-body[tabindex="0"]');
   }
-
   function step(d){
     var i = active + d;
     if (i < 0 || i > 5) return;
@@ -618,6 +916,7 @@
 
   var resizeRaf = 0;
   function onResize(){
+    setAppHeight();
     if (state === 'closed' || drag) return;
     cancelAnimationFrame(resizeRaf);
     resizeRaf = requestAnimationFrame(function(){
@@ -628,12 +927,10 @@
     });
   }
   window.addEventListener('resize', onResize);
-  window.addEventListener('orientationchange', onResize);
+  window.addEventListener('orientationchange', function(){ setTimeout(onResize, 250); });
 
-  /* ===== жесты =====
-     compact:  вверх (за любую часть карточки) – развернуть; вниз – закрыть
-     expanded: вниз за верх карточки (язычок, шапка) – свернуть;
-               текст прокручивается сам и никогда не сворачивает карточку */
+  /* жесты: compact – вверх разворачивает, вниз закрывает; expanded – вниз за верх карточки сворачивает;
+     прокрутка текста никогда не сворачивает карточку */
   var drag = null;
   function zoneOf(t){
     if (!sheet.contains(t)) return 'outside';
@@ -653,7 +950,7 @@
     if (state === 'closed' || !drag) return;
     var tt = e.touches[0], y = tt.clientY, x = tt.clientX;
     var dyStep = y - drag.y; drag.y = y;
-    if (drag.zone === 'outside'){ if (e.cancelable) e.preventDefault(); return; }  // фон не прокручивается
+    if (drag.zone === 'outside'){ if (e.cancelable) e.preventDefault(); return; }
     var nativeScroll = drag.zone === 'body' && drag.from === 'expanded';
     if (!drag.mode){
       var dy0 = y - drag.y0, dx0 = x - drag.x0;
@@ -667,7 +964,6 @@
       }
     }
     if (drag.mode === 'scroll'){
-      // прокрутка текста: не даём ей «перетечь» на страницу
       if (e.cancelable && ((atTop() && dyStep > 0) || (atBottom() && dyStep < 0))) e.preventDefault();
       return;
     }
@@ -679,20 +975,20 @@
     if (drag.from === 'compact' || !twoLevels){
       var base = drag.from === 'compact' ? compactH : expandedH;
       var dimFull = drag.from === 'compact' ? 0.5 : 1;
-      if (d < 0 && drag.from === 'compact'){        // вверх: карточка растёт до развёрнутой
+      if (d < 0 && drag.from === 'compact'){
         var h = Math.min(expandedH, compactH - d), p = (h - compactH) / range;
         drag.h = h; drag.off = 0;
         sheet.style.transform = ''; sheet.style.height = h + 'px';
         revealMore(p);
         backdrop.style.opacity = String(0.5 + 0.5 * p);
-      } else {                                       // вниз: карточка уезжает
+      } else {
         var off = Math.max(0, d);
         drag.h = base; drag.off = off;
         sheet.style.height = base + 'px'; sheet.style.transform = 'translateY(' + off + 'px)';
         revealMore(0);
         backdrop.style.opacity = String(dimFull * Math.max(0, 1 - off / base));
       }
-    } else {                                         // expanded, тянем за верх: только сворачивание
+    } else {
       var h2 = Math.max(compactH, Math.min(expandedH, expandedH - d)), p2 = (h2 - compactH) / range;
       drag.h = h2;
       sheet.style.height = h2 + 'px';
@@ -715,7 +1011,6 @@
       if (d.off > Math.min(120, base * 0.3) || (d.v > 0.45 && d.off > 24)){ closeSheet(); return; }
       settle(d.from);
     } else {
-      // порог: заметный сдвиг (не меньше 48 px и 30% разницы высот) или быстрый жест
       var moved = d.from === 'compact' ? d.h - compactH : expandedH - d.h;
       var fast = d.from === 'compact' ? d.v < -0.45 : d.v > 0.45;
       var change = moved > Math.max(48, range * 0.3) || (fast && moved > 16);
@@ -723,20 +1018,267 @@
     }
   }
 
-  /* ===== поле ввода ===== */
-  var anpInput = $('#anp');
-  $('#form').addEventListener('submit', function(e){ e.preventDefault(); recalc(); anpInput.blur(); });
-  anpInput.addEventListener('focus', function(e){ e.target.value = ''; });
-  anpInput.addEventListener('blur', function(e){ if (!e.target.value) e.target.value = lastValidANP; });
+  /* ===== модальные панели: «Как узнать ПАНО» и картинка для сохранения ===== */
+  var modalEl = null, modalOpener = null, modalTimer = 0, modalBd = $('#modalBackdrop');
+  function openModal(id, from){
+    if (modalEl || state !== 'closed') return;
+    if (document.activeElement === anpInput) anpInput.blur();
+    modalEl = $('#'+id); modalOpener = from || document.activeElement;
+    clearTimeout(modalTimer);
+    modalEl.hidden = false; modalBd.hidden = false;
+    void modalEl.offsetHeight;
+    modalEl.classList.add('is-open'); modalBd.classList.add('is-open');
+    setInert(true);
+    focusNoScroll(modalEl);
+    document.addEventListener('keydown', onModalKey);
+    overlayOpened(closeModal);
+  }
+  function closeModal(fromHistory){
+    if (!modalEl) return;
+    var m = modalEl; modalEl = null;
+    m.classList.remove('is-open'); modalBd.classList.remove('is-open');
+    setInert(false);
+    clearTimeout(modalTimer);
+    modalTimer = setTimeout(function(){ m.hidden = true; modalBd.hidden = true; }, 320);
+    document.removeEventListener('keydown', onModalKey);
+    focusNoScroll(modalOpener); modalOpener = null;
+    overlayClosed(fromHistory === true);
+  }
+  function onModalKey(e){
+    if (e.key === 'Escape' || e.key === 'Esc'){ e.preventDefault(); closeModal(); return; }
+    if (e.key === 'Tab' && modalEl) trapTab(e, modalEl);
+  }
+  modalBd.addEventListener('click', function(){ closeModal(); });
+  document.querySelectorAll('.modal [data-close]').forEach(function(b){ b.addEventListener('click', function(){ closeModal(); }); });
+  $('#helpLink').addEventListener('click', function(e){ openModal('help', e.currentTarget); });
+  // фон под панелью не прокручивается жестом
+  modalBd.addEventListener('touchmove', function(e){ if (e.cancelable) e.preventDefault(); }, {passive:false});
 
+  /* ===== карточка 1080×1920 для галереи и Stories: рисуется на canvas, не скриншот ===== */
+  var CARD_W = 1080, CARD_H = 1920, SITE = 'begomvgoru.github.io/anp-app';
+  var cardDirty = true, cardBusy = null, cardBlob = null, cardURL = '', cardCanvas = null, cardANP = 0;
+  var SERIF = '"Playfair Display", Georgia, serif', SANS = 'Montserrat, "Helvetica Neue", Arial, sans-serif';
+
+  function fontsReady(){
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    var sample = 'БегнапальцахМОИЗОНЫпульса0123456789–<>·уд/мин';
+    var loads = ['700 40px "Playfair Display"','700 40px Montserrat','600 40px Montserrat'].map(function(f){
+      return document.fonts.load(f, sample).catch(function(){});
+    });
+    return Promise.race([Promise.all(loads), new Promise(function(r){ setTimeout(r, 3000); })]);
+  }
+  function rrect(ctx, x, y, w, h, r){
+    ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.arcTo(x+w, y, x+w, y+r, r);
+    ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+    ctx.lineTo(x+r, y+h); ctx.arcTo(x, y+h, x, y+h-r, r);
+    ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r); ctx.closePath();
+  }
+  // текст с разрядкой (ctx.letterSpacing есть не во всех браузерах)
+  function spacedWidth(ctx, text, sp){
+    var w = 0, ch = text.split('');
+    for (var i=0;i<ch.length;i++) w += ctx.measureText(ch[i]).width;
+    return w + sp * Math.max(0, ch.length - 1);
+  }
+  function spaced(ctx, text, x, y, sp){
+    var ch = text.split(''), al = ctx.textAlign; ctx.textAlign = 'left';
+    for (var i=0;i<ch.length;i++){ ctx.fillText(ch[i], x, y); x += ctx.measureText(ch[i]).width + sp; }
+    ctx.textAlign = al; return x;
+  }
+  function drawWatch(ctx, anp){
+    var rad = function(d){ return (d - 90) * Math.PI / 180; };
+    ctx.fillStyle = '#B5707A';
+    ['M240 34 Q380 -12 520 34 L536 150 L224 150 Z','M240 886 Q380 932 520 886 L536 770 L224 770 Z'].forEach(function(d){
+      if (window.Path2D){ ctx.fill(new Path2D(d)); }
+    });
+    ctx.fillStyle = 'rgba(56,54,52,.32)';
+    [852, 891].forEach(function(y){ ctx.beginPath(); ctx.arc(380, y, 11, 0, Math.PI*2); ctx.fill(); });
+    ctx.fillStyle = '#383634';
+    ctx.beginPath(); rrect(ctx,182,118,396,130,36); rrect(ctx,182,672,396,130,36); rrect(ctx,716,420,64,80,15); ctx.fill();
+    [-31, 31].forEach(function(a){
+      ctx.save(); ctx.translate(380,460); ctx.rotate(a*Math.PI/180); ctx.translate(-380,-460);
+      ctx.beginPath(); rrect(ctx,716,428,56,64,14); ctx.fill(); ctx.restore();
+    });
+    ctx.beginPath(); ctx.arc(380,460,360,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#D8D2C6'; ctx.lineWidth = 6; ctx.lineCap = 'butt';
+    for (var i=0;i<40;i++){
+      var p1 = pt(i*9,319), p2 = pt(i*9,342);
+      ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+    }
+    ctx.fillStyle = '#F5F0E7'; ctx.beginPath(); ctx.arc(380,460,298,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth = 26;
+    for (var z=0;z<6;z++){
+      ctx.strokeStyle = COLORS[z];
+      ctx.beginPath(); ctx.arc(380,460,R,rad(z*60+1.6),rad((z+1)*60-1.6)); ctx.stroke();
+      var m = pt(z*60+30, R);
+      ctx.fillStyle = DARK[z] ? '#F5F0E7' : '#383634';
+      ctx.font = '700 19px ' + SANS; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(z+1), m[0], m[1]+1);
+    }
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#5B5754'; ctx.font = '700 30px ' + SANS;
+    var sp = 6, w = spacedWidth(ctx, 'МОЙ ПАНО', sp); spaced(ctx, 'МОЙ ПАНО', 380 - w/2, 352, sp);
+    ctx.fillStyle = '#383634'; ctx.font = '700 150px ' + SERIF; ctx.textAlign = 'center';
+    ctx.fillText(String(anp), 380, 508);
+    ctx.fillStyle = '#5B5754'; ctx.font = '600 30px ' + SANS; ctx.fillText('уд/мин', 380, 556);
+    ctx.fillStyle = '#9A5560'; ctx.font = '700 32px ' + SANS; ctx.fillText('6 зон пульса', 380, 616);
+  }
+  function drawCard(anp, zones){
+    var c = document.createElement('canvas');
+    c.width = CARD_W; c.height = CARD_H;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#F5F0E7'; ctx.fillRect(0, 0, CARD_W, CARD_H);
+    // бренд
+    ctx.textBaseline = 'alphabetic'; ctx.font = '700 30px ' + SANS; ctx.fillStyle = '#5B5754';
+    var sp = 8, bw = spacedWidth(ctx, 'БЕГ НА ПАЛЬЦАХ', sp), bx = (CARD_W - bw)/2;
+    spaced(ctx, 'БЕГ НА ПАЛЬЦАХ', bx, 200, sp);
+    ctx.fillStyle = 'rgba(56,54,52,.55)';
+    ctx.fillRect(bx - 28 - 80, 189, 80, 3); ctx.fillRect(bx + bw + 28, 189, 80, 3);
+    // заголовок
+    ctx.font = '700 96px ' + SERIF;
+    var t1 = 'Мои зоны ', t2 = 'пульса', w1 = ctx.measureText(t1).width, w2 = ctx.measureText(t2).width, tx = (CARD_W - w1 - w2)/2;
+    ctx.textAlign = 'left'; ctx.fillStyle = '#383634'; ctx.fillText(t1, tx, 330);
+    ctx.fillStyle = '#9A5560'; ctx.fillText(t2, tx + w1, 330);
+    // часы
+    var s = 0.7;
+    ctx.save(); ctx.translate(CARD_W/2 - 380*s, 384); ctx.scale(s, s); drawWatch(ctx, anp); ctx.restore();
+    // шесть зон
+    var x0 = 96, x1 = CARD_W - 96, y = 1060, rh = 94;
+    ctx.fillStyle = '#383634'; ctx.fillRect(x0, y, x1 - x0, 3); y += 3;
+    for (var i=0;i<6;i++){
+      var cy = y + rh/2, z = zones[i];
+      ctx.fillStyle = COLORS[i]; ctx.beginPath(); ctx.arc(x0 + 37, cy, 35, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#383634'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = DARK[i] ? '#F5F0E7' : '#383634'; ctx.font = '700 36px ' + SERIF;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i+1), x0 + 37, cy + 2);
+      ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+      ctx.fillStyle = '#5B5754'; ctx.font = '700 20px ' + SANS; spaced(ctx, z.name.toUpperCase(), x0 + 100, cy - 10, 3.6);
+      ctx.fillStyle = '#383634'; ctx.font = '600 32px ' + SANS; ctx.fillText(z.desc, x0 + 100, cy + 27);
+      var pr = splitVal(z.val);
+      ctx.textAlign = 'right'; ctx.font = '700 50px ' + SERIF; ctx.fillText(pr[1], x1, cy + 18);
+      if (pr[0]){
+        var vw = ctx.measureText(pr[1]).width;
+        ctx.font = '600 43px ' + SANS; ctx.fillText(pr[0] + ' ', x1 - vw, cy + 18);
+      }
+      ctx.textAlign = 'left';
+      y += rh;
+      ctx.fillStyle = i === 5 ? '#383634' : '#DDD5C7'; ctx.fillRect(x0, y - (i === 5 ? 0 : 2.5), x1 - x0, i === 5 ? 3 : 2.5);
+    }
+    // подпись
+    ctx.font = '700 26px ' + SANS;
+    var a = 'ЗОНЫ ОТ ПАНО · ', b = SITE, fs = 3;
+    var fw = spacedWidth(ctx, a, fs) + fs + spacedWidth(ctx, b, fs), fx = (CARD_W - fw)/2;
+    ctx.fillStyle = '#5B5754'; fx = spaced(ctx, a, fx, 1716, fs);
+    ctx.fillStyle = '#9A5560'; spaced(ctx, b, fx, 1716, fs);
+    return c;
+  }
+  function canvasToBlob(c){
+    return new Promise(function(res){
+      if (c.toBlob){ c.toBlob(function(b){ res(b); }, 'image/png'); return; }
+      var d = atob(c.toDataURL('image/png').split(',')[1]), u = new Uint8Array(d.length);
+      for (var i=0;i<d.length;i++) u[i] = d.charCodeAt(i);
+      res(new Blob([u], {type:'image/png'}));
+    });
+  }
+  function prepareCard(){
+    if (mode !== 'known') return Promise.resolve(null);
+    if (!cardDirty && cardBlob) return Promise.resolve(cardBlob);
+    if (cardBusy) return cardBusy;
+    cardDirty = false;
+    var anp = lastValidANP, zones = zonesData.slice();
+    $('#cardPh').hidden = false; $('#cardPh').textContent = 'Готовим картинку…';
+    cardBusy = fontsReady().then(function(){
+      var c = drawCard(anp, zones);
+      return canvasToBlob(c).then(function(b){ return {c:c, b:b}; });
+    }).then(function(r){
+      cardBusy = null;
+      if (!r.b) throw new Error('no blob');
+      if (cardURL) URL.revokeObjectURL(cardURL);
+      cardBlob = r.b; cardCanvas = r.c; cardANP = anp; cardURL = URL.createObjectURL(r.b);
+      var img = $('#cardImg'); img.src = cardURL; img.hidden = false; $('#cardPh').hidden = true;
+      if (cardDirty && tab === 'save') return prepareCard();
+      return cardBlob;
+    }).catch(function(){
+      cardBusy = null; cardDirty = true;
+      $('#cardPh').hidden = false; $('#cardPh').textContent = 'Не удалось подготовить картинку. Попробуй ещё раз.';
+      return null;
+    });
+    return cardBusy;
+  }
+
+  function fileName(){ return 'beg-na-paltsah-zony-pano-' + cardANP + '.png'; }
+  function setStatus(t){ $('#saveStatus').textContent = t; }
+  function cardFile(){
+    try{ return new File([cardBlob], fileName(), {type:'image/png'}); }catch(e){ return null; }
+  }
+  var CAN_SHARE_FILES = (function(){
+    try{ return !!(navigator.share && navigator.canShare && navigator.canShare({files:[new File([''], 't.png', {type:'image/png'})]})); }
+    catch(e){ return false; }
+  })();
+  function showShot(){
+    if (!cardCanvas) return;
+    var img = $('#shotImg');
+    try{ img.src = cardCanvas.toDataURL('image/png'); }catch(e){ img.src = cardURL; }   // data: надёжнее для «удерживай → сохранить»
+    $('#shotTip').textContent = IS_IOS ? 'Нажми и удерживай картинку, затем выбери «Сохранить в Фото».'
+                                       : 'Нажми и удерживай картинку, затем выбери «Скачать изображение».';
+    $('#shotTip2').hidden = !IN_APP;
+    openModal('shot', document.activeElement);
+  }
+  function shareNow(){
+    var f = cardFile();
+    if (f && CAN_SHARE_FILES && navigator.canShare({files:[f]})){
+      navigator.share({files:[f], title:'Мои зоны пульса'}).then(function(){
+        setStatus('Готово!');
+      }).catch(function(err){
+        if (err && err.name === 'AbortError') return;      // пользователь закрыл меню
+        showShot();
+      });
+      return true;
+    }
+    return false;
+  }
+  function downloadNow(){
+    var a = document.createElement('a');
+    a.href = cardURL; a.download = fileName(); a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    setStatus('PNG сохранён в «Загрузки»');
+  }
+  function withCard(fn){
+    if (cardBlob && !cardDirty && !cardBusy){ fn(); return; }   // синхронно – iOS требует вызов прямо из нажатия
+    prepareCard().then(function(b){ if (b) fn(); });
+  }
+  $('#btnShare').addEventListener('click', function(){
+    withCard(function(){
+      if (shareNow()) return;
+      if (IN_APP || IS_IOS) showShot(); else downloadNow();
+    });
+  });
+  $('#btnSave').addEventListener('click', function(){
+    withCard(function(){
+      if (IN_APP){ showShot(); return; }                  // встроенные браузеры не дают скачать файл
+      if (IS_IOS){                                         // на iPhone «Сохранить изображение» есть в системном меню
+        if (shareNow()){ setStatus('Выбери «Сохранить изображение»'); return; }
+        showShot(); return;
+      }
+      downloadNow();
+    });
+  });
+  if (!CAN_SHARE_FILES && !IS_IOS && !IN_APP){
+    // браузер без системного меню отправки файлов: одна кнопка – скачать
+    $('#btnShare').hidden = true;
+    $('#btnSave').classList.add('pri');
+  }
+
+  /* ===== запуск ===== */
   try{
     var saved = parseInt(localStorage.getItem('anp'), 10);
     if (!isNaN(saved) && saved >= 60 && saved <= 220){ anpInput.value = saved; lastValidANP = saved; }
   }catch(e){}
-
+  anpInput.value = lastValidANP;
+  $('#watch').setAttribute('role', 'group');   // внутри часов – кнопки зон, роль img их скрывала
   buildWatch();
   render();
   select(0);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if (state !== 'closed') onResize(); });
 })();
 </script>
 </body>
