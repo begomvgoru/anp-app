@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F5F0E7">
 <meta name="description" content="Быстрый расчёт беговых пульсовых зон от ПАНО.">
 <title>Зоны пульса от ПАНО · Бег на пальцах</title>
@@ -30,6 +30,11 @@
   .watch{display:block;width:100%;max-width:400px;margin:6px auto 0;height:auto;overflow:visible}
   .strap{fill:var(--zc,#B5707A);transition:fill .35s ease}
   .arc{fill:none;stroke-linecap:butt;cursor:pointer;transition:stroke-width .25s ease}
+  /* невидимые увеличенные области нажатия на дуги */
+  .zg{outline:none;cursor:pointer}
+  .zhit{fill:none;stroke:transparent;stroke-width:88;pointer-events:stroke;cursor:pointer}
+  .arc-ring{fill:none;stroke:var(--ink);stroke-width:54;opacity:0;pointer-events:none}
+  .zg:focus-visible .arc-ring{opacity:1}
   .arc-num{font-family:var(--sans);font-weight:700;font-size:19px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
   .w-zone{font-family:var(--sans);font-weight:700;font-size:27px;letter-spacing:.2em;text-anchor:middle;fill:var(--ink2)}
   .w-num{font-family:var(--serif);font-weight:700;font-size:88px;text-anchor:middle;fill:var(--ink);font-variant-numeric:lining-nums}
@@ -62,18 +67,53 @@
   .zdesc{font-size:16px;font-weight:600;line-height:1.25}
   .zval{font-family:var(--serif);font-weight:700;font-size:23px;white-space:nowrap;font-variant-numeric:lining-nums;text-align:right}
   .chev{width:10px;height:10px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s ease}
-  .zone.open .chev{transform:rotate(-135deg) translate(-2px,-2px)}
-  .zone.open .zhead{padding-bottom:8px}
-  .zbody{display:none;padding:0 2px 16px 54px;font-size:15px}
-  .zone.open .zbody{display:block}
-  .zbody p{margin:0 0 8px}
-  .zbody b{font-weight:700}
-  .zbody ul{margin:0 0 8px;padding:0;list-style:none}
-  .zbody li{position:relative;padding-left:16px;margin-bottom:3px}
-  .zbody li:before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--rose)}
-  .pct{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.06em;padding:3px 12px;border-radius:999px;margin-bottom:10px;color:var(--ink)}
+  .zhead .chev{transform:rotate(-45deg) translate(-2px,-2px)}
+  .pct{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.06em;padding:3px 12px;border-radius:999px;color:var(--ink)}
   .pct.dark{color:var(--paper)}
   .note{border-left:3px solid var(--ochre);padding:2px 0 2px 12px;margin-top:10px}
+
+  /* выдвижная карточка зоны (bottom sheet) */
+  .sheet-backdrop{position:fixed;inset:0;z-index:40;background:rgba(56,54,52,.42);opacity:0;transition:opacity .3s ease;cursor:pointer}
+  .sheet-backdrop.is-open{opacity:1}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;width:min(480px,100%);margin:0 auto;display:flex;flex-direction:column;
+    max-height:74vh;max-height:calc(var(--app-h,100vh)*.74);background:var(--paper);color:var(--ink);
+    border:1.5px solid var(--ink);border-bottom:0;border-radius:26px 26px 0 0;box-shadow:0 -14px 40px rgba(56,54,52,.22);
+    overflow:hidden;outline:none;transform:translateY(100%);transition:transform .34s cubic-bezier(.22,.9,.3,1);will-change:transform}
+  .sheet.is-open{transform:translateY(0)}
+  .sheet[hidden],.sheet-backdrop[hidden]{display:none}
+  .sheet:before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:var(--zc,#B5707A);transition:background .3s ease}
+  .sheet-grab{flex:none;display:flex;justify-content:center;padding:15px 0 4px}
+  .sheet-grab span{width:44px;height:5px;border-radius:3px;background:var(--ink);opacity:.25}
+  .sheet-head{flex:none;padding:4px 18px 14px;border-bottom:1.5px solid var(--line)}
+  .s-top{display:grid;grid-template-columns:48px 1fr 40px;align-items:center;gap:12px}
+  .s-top .badge{width:48px;height:48px;font-size:24px}
+  .s-title{margin:0;font:inherit;min-width:0}
+  .s-title .zdesc{font-size:18px;line-height:1.2}
+  .s-close{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;color:var(--ink);position:relative;cursor:pointer;padding:0}
+  .s-close:before,.s-close:after{content:"";position:absolute;left:50%;top:50%;width:16px;height:2px;margin:-1px 0 0 -8px;background:var(--ink);border-radius:1px;transform:rotate(45deg)}
+  .s-close:after{transform:rotate(-45deg)}
+  .s-range{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:12px}
+  .s-val{font-family:var(--serif);font-weight:700;font-size:32px;line-height:1.05;white-space:nowrap;font-variant-numeric:lining-nums}
+  .s-val .sgn{font-family:var(--sans);font-weight:600;font-size:.86em}
+  .s-unit{font-size:14px;font-weight:600;color:var(--ink2);margin-left:6px;font-family:var(--sans)}
+  .s-range .pct{margin-left:auto}
+  .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:14px 18px 10px;font-size:15px}
+  .sheet-body p{margin:0 0 8px}
+  .sheet-body b{font-weight:700}
+  .sheet-body ul{margin:0 0 8px;padding:0;list-style:none}
+  .sheet-body li{position:relative;padding-left:16px;margin-bottom:3px}
+  .sheet-body li:before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--rose)}
+  .sheet-nav{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1.5px solid var(--line);
+    padding:12px 18px 12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .s-step{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font-family:var(--sans);font-weight:700;font-size:14px;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:opacity .2s ease,transform .1s ease}
+  .s-step:active{transform:scale(.97)}
+  .s-step[disabled]{visibility:hidden}
+  .s-step .chev{width:9px;height:9px;transform:rotate(-45deg) translate(-1px,-1px)}
+  .s-step.prev .chev{transform:rotate(135deg) translate(-1px,-1px)}
+  .s-dots{display:flex;gap:4px;align-items:center}
+  .s-dots i{display:block;width:12px;height:6px;border-radius:3px;transition:width .25s ease,box-shadow .25s ease}
+  .s-dots i.on{width:22px;box-shadow:0 0 0 1.5px var(--ink)}
+  html.sheet-lock,html.sheet-lock body{overflow:hidden}
 
   /* подсказка */
   .help{margin-top:26px;border:1.5px solid var(--ink);border-radius:18px;overflow:hidden}
@@ -91,8 +131,10 @@
 
   :focus-visible{outline:2.5px solid var(--rose-d);outline-offset:3px;border-radius:8px}
   .field input:focus-visible{outline:none}
+  .sheet:focus,.sheet:focus-visible,.zg:focus,.zg:focus-visible{outline:none}
+  html{scrollbar-gutter:stable}
   .field:focus-within{border-bottom-color:var(--rose-d)}
-  @media (max-width:350px){.zval{font-size:20px}.zbody{padding-left:2px}}
+  @media (max-width:350px){.zval{font-size:20px}.s-val{font-size:28px}.s-step{padding:0 12px}.s-dots i{width:9px}.s-dots i.on{width:16px}}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -140,7 +182,7 @@
 
   <h2>Шесть зон</h2>
   <p class="sub">Пульс в ударах в минуту</p>
-  <ul class="zones" id="zones" aria-live="polite"></ul>
+  <ul class="zones" id="zones"></ul>
 
   <details class="help">
     <summary><span class="q">?</span><span>Как узнать свой анаэробный порог (ПАНО)</span><span class="chev"></span></summary>
@@ -152,6 +194,28 @@
 
   <div class="foot">Бег на пальцах</div>
 </main>
+
+<div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sName sDesc" tabindex="-1" hidden>
+  <div class="sheet-grab" aria-hidden="true"><span></span></div>
+  <header class="sheet-head">
+    <div class="s-top">
+      <span class="badge" id="sBadge" aria-hidden="true">1</span>
+      <h3 class="s-title"><span class="zname" id="sName">Зона 1</span><br><span class="zdesc" id="sDesc">Восстановление</span></h3>
+      <button class="s-close" id="sClose" type="button" aria-label="Закрыть"></button>
+    </div>
+    <div class="s-range">
+      <span class="s-val"><span id="sVal">&lt; 132</span><span class="s-unit">уд/мин</span></span>
+      <span class="pct" id="sPct"></span>
+    </div>
+  </header>
+  <div class="sheet-body" id="sheetBody"></div>
+  <nav class="sheet-nav" aria-label="Другие зоны">
+    <button class="s-step prev" id="sPrev" type="button"><span class="chev" aria-hidden="true"></span><span id="sPrevT">Зона 0</span></button>
+    <span class="s-dots" id="sDots" aria-hidden="true"></span>
+    <button class="s-step next" id="sNext" type="button"><span id="sNextT">Зона 2</span><span class="chev" aria-hidden="true"></span></button>
+  </nav>
+</section>
 
 <script>
 (function(){
@@ -230,27 +294,53 @@
       ticks.appendChild(l);
     }
     var arcs = $('#arcs');
-    for (var z=0;z<6;z++){
-      var a0 = z*60 + 1.6, a1 = (z+1)*60 - 1.6;
+    function arcD(a0, a1){
       var s = pt(a0,R), e = pt(a1,R);
+      return 'M'+s[0].toFixed(2)+' '+s[1].toFixed(2)+' A'+R+' '+R+' 0 0 1 '+e[0].toFixed(2)+' '+e[1].toFixed(2);
+    }
+    for (var z=0;z<6;z++){
+      var d = arcD(z*60 + 1.6, (z+1)*60 - 1.6);
+      var g = document.createElementNS(NS,'g');
+      g.setAttribute('class','zg');
+      g.setAttribute('tabindex','0');
+      g.setAttribute('role','button');
+      g.setAttribute('aria-haspopup','dialog');
+      g.dataset.i = z;
+      // обводка для фокуса с клавиатуры (видна только при :focus-visible)
+      var ring = document.createElementNS(NS,'path');
+      ring.setAttribute('d',d); ring.setAttribute('class','arc-ring');
+      g.appendChild(ring);
       var p = document.createElementNS(NS,'path');
-      p.setAttribute('d','M'+s[0].toFixed(2)+' '+s[1].toFixed(2)+' A'+R+' '+R+' 0 0 1 '+e[0].toFixed(2)+' '+e[1].toFixed(2));
+      p.setAttribute('d',d);
       p.setAttribute('class','arc');
       p.setAttribute('stroke',COLORS[z]);
       p.setAttribute('stroke-width',24);
-      p.dataset.i = z;
-      p.addEventListener('click', onArc);
-      arcs.appendChild(p);
+      g.appendChild(p);
       var m = pt(z*60+30, R);
       var t = document.createElementNS(NS,'text');
       t.setAttribute('x',m[0].toFixed(1)); t.setAttribute('y',m[1].toFixed(1));
       t.setAttribute('class','arc-num');
       t.setAttribute('fill', DARK[z] ? '#F5F0E7' : '#383634');
+      t.setAttribute('aria-hidden','true');
       t.textContent = z+1;
-      arcs.appendChild(t);
+      g.appendChild(t);
+      // прозрачная широкая дуга без зазоров – увеличенная область нажатия
+      var hit = document.createElementNS(NS,'path');
+      hit.setAttribute('d', arcD(z*60, (z+1)*60));
+      hit.setAttribute('class','zhit');
+      g.appendChild(hit);
+      g.addEventListener('click', onArc);
+      g.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'){ e.preventDefault(); onArc(e); }
+      });
+      arcs.appendChild(g);
     }
   }
-  function onArc(e){ select(+e.currentTarget.dataset.i, true, true); }
+  function onArc(e){
+    var i = +e.currentTarget.dataset.i;
+    select(i);
+    openSheet(i, e.currentTarget);
+  }
 
   function splitVal(v){
     var c = v.charAt(0);
@@ -273,28 +363,25 @@
       li.className = 'zone';
       var dk = DARK[i] ? ' dark' : '';
       li.innerHTML =
-        '<button class="zhead" type="button" aria-expanded="false" aria-controls="zb'+i+'">'+
+        '<button class="zhead" type="button" aria-haspopup="dialog" aria-controls="sheet">'+
           '<span class="badge'+dk+'" style="background:'+COLORS[i]+'">'+(i+1)+'</span>'+
           '<span><span class="zname">'+z.name+'</span><br><span class="zdesc">'+z.desc+'</span></span>'+
           '<span class="zval">'+valHTML(z.val)+'</span><span class="chev"></span>'+
-        '</button>'+
-        '<div class="zbody" id="zb'+i+'">'+
-          '<span class="pct'+dk+'" style="background:'+COLORS[i]+'">'+info.pct+'</span>'+
-          '<p><b>Суть:</b> '+info.sut+'</p>'+
-          '<p><b>Для чего:</b> '+info.why+'</p>'+
-          '<p><b>Примеры тренировок:</b></p>'+
-          '<ul>'+info.ex.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+
-          (info.note ? '<p class="note">'+info.note+'</p>' : '')+
-        '</div>';
-      li.querySelector('.zhead').addEventListener('click', function(){
-        var isOpen = li.classList.contains('open');
-        select(i, !isOpen, false);
+        '</button>';
+      li.querySelector('.zhead').addEventListener('click', function(e){
+        select(i);
+        openSheet(i, e.currentTarget);
       });
       ul.appendChild(li);
     });
+    // подписи дуг для экранного диктора
+    document.querySelectorAll('.zg').forEach(function(g,k){
+      var z = zonesData[k];
+      g.setAttribute('aria-label', z.name + ', ' + z.desc + ', ' + z.val.replace('<','менее').replace('>','более') + ' уд/мин');
+    });
   }
 
-  function select(i, open, scroll){
+  function select(i){
     active = i;
     var z = zonesData[i];
     $('#wZone').textContent = z.name.toUpperCase();
@@ -311,21 +398,200 @@
     $('#wDesc').textContent = z.desc;
     $('#watch').style.setProperty('--zc', COLORS[i]);
     document.querySelectorAll('.arc').forEach(function(a,k){ a.setAttribute('stroke-width', k===i ? 38 : 22); });
-    document.querySelectorAll('.zone').forEach(function(li,k){
-      var on = (k===i) && open;
-      li.classList.toggle('open', on);
-      li.querySelector('.zhead').setAttribute('aria-expanded', on ? 'true' : 'false');
-    });
-    if (scroll){
-      var el = document.querySelectorAll('.zone')[i];
-      if (el && el.scrollIntoView) el.scrollIntoView({block:'nearest', behavior:'smooth'});
-    }
+    if (sheetOpen) fillSheet(i);
   }
 
   function recalc(){
-    var wasOpen = !!document.querySelector('.zone.open');
     render();
-    select(active, wasOpen, false);
+    select(active);
+  }
+
+  /* ===== выдвижная карточка зоны (bottom sheet) ===== */
+  var sheet = $('#sheet'), backdrop = $('#sheetBackdrop'), sheetBody = $('#sheetBody');
+  var mainEl = $('main');
+  var sheetOpen = false, opener = null, hideTimer = null;
+  var histPushed = false, histBackPending = false;
+
+  (function buildDots(){
+    var dots = $('#sDots');
+    COLORS.forEach(function(c){ var d = document.createElement('i'); d.style.background = c; dots.appendChild(d); });
+  })();
+
+  function fillSheet(i){
+    var z = zonesData[i], info = INFO[i], dk = DARK[i] ? ' dark' : '';
+    sheet.style.setProperty('--zc', COLORS[i]);
+    var b = $('#sBadge');
+    b.className = 'badge' + dk; b.style.background = COLORS[i]; b.textContent = i+1;
+    $('#sName').textContent = z.name;
+    $('#sDesc').textContent = z.desc;
+    $('#sVal').innerHTML = valHTML(z.val);
+    var pc = $('#sPct');
+    pc.className = 'pct' + dk; pc.style.background = COLORS[i]; pc.textContent = info.pct;
+    sheetBody.innerHTML =
+      '<p><b>Суть:</b> '+info.sut+'</p>'+
+      '<p><b>Для чего:</b> '+info.why+'</p>'+
+      '<p><b>Примеры тренировок:</b></p>'+
+      '<ul>'+info.ex.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+
+      (info.note ? '<p class="note">'+info.note+'</p>' : '');
+    sheetBody.scrollTop = 0;
+    var prev = $('#sPrev'), next = $('#sNext');
+    prev.disabled = i === 0; next.disabled = i === 5;
+    $('#sPrevT').textContent = 'Зона ' + Math.max(1, i);
+    $('#sNextT').textContent = 'Зона ' + Math.min(6, i+2);
+    prev.setAttribute('aria-label', i === 0 ? 'Предыдущей зоны нет' : 'Предыдущая: ' + zonesData[i-1].name + ', ' + zonesData[i-1].desc);
+    next.setAttribute('aria-label', i === 5 ? 'Следующей зоны нет' : 'Следующая: ' + zonesData[i+1].name + ', ' + zonesData[i+1].desc);
+    document.querySelectorAll('#sDots i').forEach(function(d,k){ d.classList.toggle('on', k === i); });
+  }
+
+  function setAppHeight(){
+    document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+  }
+
+  function focusNoScroll(el){
+    if (!el || !el.focus) return;
+    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
+  }
+
+  function openSheet(i, from){
+    fillSheet(i);
+    if (sheetOpen) return;
+    sheetOpen = true;
+    opener = from || null;
+    clearTimeout(hideTimer);
+    setAppHeight();
+    sheet.style.transform = ''; sheet.style.transition = '';
+    backdrop.style.opacity = ''; backdrop.style.transition = '';
+    sheet.hidden = false; backdrop.hidden = false;
+    void sheet.offsetHeight; // зафиксировать стартовое положение для анимации
+    sheet.classList.add('is-open'); backdrop.classList.add('is-open');
+    document.documentElement.classList.add('sheet-lock');
+    if ('inert' in mainEl) mainEl.inert = true; else mainEl.setAttribute('aria-hidden','true');
+    focusNoScroll(sheet);
+    document.addEventListener('keydown', onSheetKey);
+    document.addEventListener('touchstart', onTouchStart, {passive:true});
+    document.addEventListener('touchmove', onTouchMove, {passive:false});
+    document.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('touchcancel', onTouchEnd);
+    // «Назад» на Android закрывает карточку: одна запись истории на текущем адресе
+    if (!histPushed){
+      try{ history.pushState({anpSheet:true}, ''); histPushed = true; }catch(e){ histPushed = false; }
+    }
+  }
+
+  function closeSheet(fromHistory){
+    if (!sheetOpen) return;
+    sheetOpen = false;
+    drag = null;
+    sheet.style.transition = ''; backdrop.style.transition = '';
+    sheet.classList.remove('is-open'); backdrop.classList.remove('is-open');
+    sheet.style.transform = ''; backdrop.style.opacity = '';
+    document.documentElement.classList.remove('sheet-lock');
+    if ('inert' in mainEl) mainEl.inert = false; else mainEl.removeAttribute('aria-hidden');
+    document.removeEventListener('keydown', onSheetKey);
+    document.removeEventListener('touchstart', onTouchStart, {passive:true});
+    document.removeEventListener('touchmove', onTouchMove, {passive:false});
+    document.removeEventListener('touchend', onTouchEnd);
+    document.removeEventListener('touchcancel', onTouchEnd);
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function(){ sheet.hidden = true; backdrop.hidden = true; }, 360);
+    focusNoScroll(opener);
+    opener = null;
+    if (histPushed){
+      histPushed = false;
+      if (!fromHistory){ histBackPending = true; history.back(); }
+    }
+  }
+
+  window.addEventListener('popstate', function(){
+    if (histBackPending){ histBackPending = false; return; }
+    histPushed = false;
+    if (sheetOpen) closeSheet(true);
+  });
+  // после перезагрузки на «нашей» записи истории – просто снять пометку
+  try{ if (history.state && history.state.anpSheet) history.replaceState(null, ''); }catch(e){}
+
+  function onSheetKey(e){
+    if (e.key === 'Escape' || e.key === 'Esc'){ e.preventDefault(); closeSheet(); return; }
+    if (e.key === 'Tab'){
+      var f = Array.prototype.filter.call(sheet.querySelectorAll('button'), function(b){ return !b.disabled; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length-1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === sheet)){ e.preventDefault(); focusNoScroll(last); }
+      else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); focusNoScroll(first); }
+    }
+  }
+
+  function step(d){
+    var i = active + d;
+    if (i < 0 || i > 5) return;
+    select(i);
+  }
+  $('#sPrev').addEventListener('click', function(){ step(-1); });
+  $('#sNext').addEventListener('click', function(){ step(1); });
+  $('#sClose').addEventListener('click', function(){ closeSheet(); });
+  backdrop.addEventListener('click', function(){ closeSheet(); });
+  window.addEventListener('resize', function(){ if (sheetOpen) setAppHeight(); });
+
+  /* свайп вниз для закрытия, не мешающий прокрутке текста карточки */
+  var drag = null;
+  function onTouchStart(e){
+    if (e.touches.length !== 1){ drag = null; return; }
+    var t = e.target, y = e.touches[0].clientY, x = e.touches[0].clientX;
+    drag = {
+      onSheet: sheet.contains(t),
+      inBody: sheetBody.contains(t),
+      x0: x, y0: y, y: y, base: y, t0: Date.now(), mode: null, off: 0, lastT: Date.now(), v: 0
+    };
+  }
+  function bodyScrollable(){ return sheetBody.scrollHeight > sheetBody.clientHeight + 1; }
+  function atTop(){ return sheetBody.scrollTop <= 0; }
+  function atBottom(){ return sheetBody.scrollTop + sheetBody.clientHeight >= sheetBody.scrollHeight - 1; }
+  function onTouchMove(e){
+    if (!sheetOpen || !drag) return;
+    if (!drag.onSheet){ if (e.cancelable) e.preventDefault(); return; } // фон страницы не прокручивается
+    var y = e.touches[0].clientY, x = e.touches[0].clientX;
+    var dyStep = y - drag.y; drag.y = y;
+    if (!drag.mode){
+      var dy = y - drag.y0, dx = x - drag.x0;
+      if (Math.abs(dy) < 5 && Math.abs(dx) < 5) return;
+      if (Math.abs(dx) > Math.abs(dy)) drag.mode = 'block';
+      else if (!drag.inBody || !bodyScrollable()) drag.mode = dy > 0 ? 'drag' : 'block';
+      else if (atTop() && dy > 0) drag.mode = 'drag';
+      else drag.mode = 'scroll';
+      if (drag.mode === 'drag'){ drag.base = drag.y0; startDrag(); }
+    }
+    if (drag.mode === 'scroll'){
+      // текст долистан до верха и палец продолжает тянуть вниз – переходим в свайп карточки
+      if (atTop() && dyStep > 0 && e.cancelable){ drag.mode = 'drag'; drag.base = y - dyStep; startDrag(); }
+      else {
+        if (e.cancelable && ((atTop() && dyStep > 0) || (atBottom() && dyStep < 0))) e.preventDefault();
+        return;
+      }
+    }
+    if (e.cancelable) e.preventDefault();
+    if (drag.mode !== 'drag') return;
+    var off = Math.max(0, y - drag.base);
+    var now = Date.now(), dt = Math.max(1, now - drag.lastT);
+    drag.v = 0.7 * ((off - drag.off) / dt) + 0.3 * drag.v;
+    drag.off = off; drag.lastT = now;
+    sheet.style.transform = 'translateY(' + off + 'px)';
+    backdrop.style.opacity = String(Math.max(0, 1 - off / (sheet.offsetHeight || 1)));
+  }
+  function startDrag(){
+    sheet.style.transition = 'none';
+    backdrop.style.transition = 'none';
+  }
+  function onTouchEnd(){
+    if (!drag) return;
+    var d = drag; drag = null;
+    if (d.mode !== 'drag') return;
+    var h = sheet.offsetHeight || 1;
+    if (d.off > Math.min(140, h * 0.28) || (d.v > 0.45 && d.off > 24)){
+      closeSheet();
+    } else {
+      sheet.style.transition = ''; backdrop.style.transition = '';
+      sheet.style.transform = ''; backdrop.style.opacity = '';
+    }
   }
 
   /* ===== поле ввода ===== */
@@ -341,7 +607,7 @@
 
   buildWatch();
   render();
-  select(0, false, false);
+  select(0);
 })();
 </script>
 </body>
